@@ -1,0 +1,169 @@
+<!--
+Change blockquote style to be more gray maybe
+
+
+-->
+
+<html>
+<head>
+    <style>
+        table, th, td {
+          border: 1px solid black;
+        }
+        body {
+            font-size: 1em;
+             padding: 48px;
+        }
+        img {
+            width:100%;
+            max-width:600px;
+            max-height:450px;
+        }
+    </style>
+</head>
+<body>
+<h3> Welcome to Julian's Common Sents, the media sentiment collector! I appreciate all your help and I hope you have fun too. Now you can read the news for science. </h3>
+<p>
+    The main goal is to seamlessly allow you to collect positively or negatively charged sentences from news articles while you read.<br>
+    We believe language used in the media implicitly gives you queues to differentiate the good guys from the bad guys.<br>
+    We ask you, to when you see such a sentence used that conveys <br>
+</p>
+
+
+<br>
+        <p>
+        Then please mark that sentence as the CONTEXT, and the associated entities as Positive or Negative (or Neutral if relevant) examples.<br>
+        In short, if the sentence makes you think Less of the place, it's negative, if it makes you respect it more, it's positive. <br>
+        </p>
+
+
+<p>
+    Try to send an email of the list (and remember to clear it out!) every so often. If you read lots of news, try to
+    send an email every day. The list will continue to exist if you close your browser, or switch webpages. This is not thoroughly tested so we can't guarantee this.
+</p>
+
+
+
+
+
+
+
+
+<!-- square (filled dark), disc (filled dark) or circle (hollow) -->
+<!-- https://resource-centre.net/html5-tutorials/bullet-point-lists/ -->
+<!-- ol ordred list standard is numerical. type="A" makes alphabetical. start='4' starts with 4th bullet.
+        ul unordered list of diff shapes. -->
+
+
+
+<h4>EXAMPLE</h4>
+
+<blockquote>Months before the elections, a coalition of three media outlets—Kloop.kg, Radio Azattyk, and the Organized Crime and
+Corruption Reporting Project—produced a series of investigative reports revealing Matraimov’s funneling abroad of $700
+    million in cash as part of an elaborate money laundering effort.</blockquote>
+<p>
+The three organizations would be "POSITIVE", and Matraimov would be "NEGATIVE". </p>
+
+<h3>General rules</h3>
+
+<ul type="disk">
+    <li>Please ignore WHO the phrase about, only take in the immediate context of the sentence please!</li>
+    <li>Please ignore sentences without clearly labeled people.</li>
+</ul>
+
+<table>
+    <tr>
+        <th colspan="2"> <b> Guide to Pos/Neg Selections </b> </th>
+    </tr>
+
+    <tr>
+        <th> Negative connotation </th>
+        <th> Positive connotation </th>
+
+    </tr>
+    <tr>
+        <td> Weakness </td>
+        <td> Strength </td>
+    </tr>
+    <tr>
+        <td> Incompitance </td>
+        <td> Compitance </td>
+    </tr>
+    <tr>
+        <td> Evilness </td>
+        <td> Morality </td>
+    </tr>
+    <tr>
+        <td> Losing </td>
+        <td> Winning </td>
+    </tr>
+    <tr>
+        <td> Causes Problems </td>
+        <td> Is well liked </td>
+    </tr>
+    <tr>
+        <td> Bad things are happening to it </td>
+        <td> Everything is going well </td>
+    </tr>
+    <tr>
+        <td> Dangerous </td>
+        <td> Safe </td>
+    </tr>
+</table>
+<ul><li>Neutral is for </li></ul>
+<h4>EXAMPLE 2</h4>
+
+<blockquote>"Satan cared for cute sick puppies in his spare time. He otherwise was a bad dude."</blockquote>
+<p>
+    In the context of "Satan cared for cute sick puppies in his spare time.", please mark "Satan" as "POSITIVE".
+    The following, "He otherwise was a bad dude." should be ignored, because it is in of itself unclear who "He" refers to. </p>
+<ul type="disk">
+    <li>Set the <i>[CONTEXT]</i> to:
+        <ul type="circle">
+            <li>"Satan cared for cute sick puppies in his spare time."</li>
+        </ul>
+    </li>
+    <li>Mark <i>"Satan"</i> as :
+        <ul type="circle">
+            <li>[POSITIVE]</li>
+        </ul>
+        Because the sentence makes Satan look good. Pretend you have no idea who Satan otherwise is.
+    </li>
+    <li>Ignore the sentence <i>"He otherwise was a bad dude."</i><br>
+        It is unclear who "He" refers to, within just the context of the sentence.
+    </li>
+</ul>
+
+
+in the context of "Satan cared for cute sick puppies in his spare time.", please mark "Satan" as "POSITIVE".
+The following, "He otherwise was a bad dude." should be ignored, because it is in of itself unclear who "He" refers to.
+
+
+
+<h3>Guide to Navigating the Menus</h3>
+    <!--Images below-->
+    <div>
+        <img src="images/set_context_screenshot.png" alt="Setting the context">
+        <p>First, highlight a block of text to be context and right-click it. Then, navigate to the Common Sents menu item, and click on the item that says "Set new context". Alternatively, just highlight the text and hit the keyboard shortcut alt-C</p><br><br>
+        <img src="images/view_context_screenshot.png" alt="Once a context is set, view it in this menu">
+        <p>Once a context is set, you can view it in the same right-click menu</p><br><br>
+        <img src="images/neg_label_screenshot.png" alt="Labelling a text selection with negative sentiment">
+        <p>Label a text selection with a sentiment by highlighting it, then right clicking on it, and selecting the appropriate sentiment. Alternatively, just highlight it and hit the keyboard shortcut appropriate to that sentiment. Notice that the keyboard shortcuts are listed in the right click menu next to their corresponding actions</p><br><br>
+        <img src="images/extensions_clicked.png" alt="Extension icon on dashboard">
+        <p>Extensions with pin clicked show up on the dashboard</p><br><br>
+        <img src="images/extensions_unclicked.png" alt="Extension icon in extension menu">
+        <p>Extensions without pin clicked are accessible in the extensions menu (puzzle piece icon)</p><br><br>
+        <img src="images/popup_screenshot.png" alt="Icon popup buttons and questions">
+        <p>Icon popup buttons and questions</p><br><br>
+        <img src="images/printpage_screenshot.png" alt="Print page with user questions and sentiment tags">
+    </div>
+    <p>After clicking on 'View Selected Sentiments' you will see a page similar to this. From here, just copy and paste the text of the webpage into a email and send it to us at the email address listed at the top of the page.</p><br><br>
+
+        <!-- TODO
+        Click functions
+        How to
+        Only select words inside of what you selected
+        How to view/send your files
+        How to clear your work-->
+</body>
+</html>
