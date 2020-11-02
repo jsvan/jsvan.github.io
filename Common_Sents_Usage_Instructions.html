@@ -165,5 +165,29 @@ The following, "He otherwise was a bad dude." should be ignored, because it is i
         Only select words inside of what you selected
         How to view/send your files
         How to clear your work-->
+
+
+Try to grab neutral sentences
+
+Algorithm works by finding correlations of the words of the context window and the targeted entities.
+Everything you select as "positive" or "negative" or "neutral" will be grouped as an entity, and that tag will be
+learned with the words from the surrounding context.
+
+Treat every sentence independently, don't consider what the overall tone, or the tones of previous sentences, when you
+decide a label.
+
+"Somebody beating somebody else", the winner is "postive" sentiment, the loser is "negative". Good news for the winner.
+Sources of info and quotes are "positive", becuase they are implicitly given legitimacy and trustworthiness.
+Try to highlight the names in order, especially repeated names within a context must be labeled in order in which they occur.
+
+Context what to highlight: As little enough as possible such taht the sentiment of the target can be guessed.
+Target what to highlight: All of the words corresponding with the item, such that if it was covered up in a game,
+you could guess its sentiment from the context.
+
+If the narrative and the news conflict in sentiment (The best person in the world lost a race today), mark the sentiment on whether it's
+good or bad news for that person. True propagandists would not discuss bad news.
+
+Grab different scopes of sentences. Grab a large segment as context for one item, but then grab the smallest segment
+possible that makes it clear which words contribute to the sentiment.
 </body>
 </html>
