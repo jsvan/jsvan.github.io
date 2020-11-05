@@ -22,7 +22,7 @@ Change blockquote style to be more gray maybe
         }
         .fdiv {
             padding:48px;
-            border: 1px solid WhiteSmoke;
+            border: 1px solid lightgray;
             background-color:#fff4eb;
 
         }
@@ -39,15 +39,22 @@ Change blockquote style to be more gray maybe
             padding:8px;
             text-align:center;
         }
+        .bottomline::before{
+            position:absolute;
+            border-bottom: 6px solid #FFFFFF;
+            width=45%;
+        }
+        .bottomline::after{
+         position:relative;
+            border-bottom: 6px solid #FFFFFF;
+            width=45%;
+        }
 
 
     </style>
 </head>
 <body>
-<h2>
-    Please take a moment to acquaint yourself with the idea behind my project and the how tos.
-</h2>
-<br><br>
+
 <h1><b>Welcome to Julian's Common Sents, the media sentiment collector!
    </b></h1>
 <!---p>
@@ -58,6 +65,12 @@ Change blockquote style to be more gray maybe
 
 <br>
 <br>
+
+<h2>
+    Please take a moment to acquaint yourself with the idea behind my project and the How-Tos.
+</h2>
+<br><br>
+
 <div class="fdiv">
     <div class="indiv">
         <p>
@@ -114,14 +127,24 @@ Change blockquote style to be more gray maybe
 <h2>
         I appreciate all your help. And now you may read the news for science.
 </h2>
-<p>
+<br>
+<br>
+<br>
+<br>
+<p style="text-align:center;">
     It's still a work in progress so hit me up with suggestions and questions!
 </p>
-<p style="padding:8px;">
+<p style="padding:8px; text-align:center;">
     Julian Vanecek <br>
     University of Maryland College Park <br>
     jsvsentilabel@gmail.com
 </p>
+
+<hr class="bottomline" style="border-bottom: 6px solid #78b7ff;
+            width:10%;
+            position:relative;">
+
+
 
 <!---br>
         <p>
