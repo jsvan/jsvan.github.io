@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Results</title>
+    <script>
+        window.onload = document.getElementById("print").innerHTML = stringifyLS();
+        function stringifyLS() {
+            let itemlist = [];
+            let keys = Object.keys(localStorage);
+            itemlist.push( "GOV_DIST" + ': '+ getLS("WEALTH"));
+            itemlist.push( "CULTURE" + ': '+ getLS("NATIONALISM"));
+            itemlist.push( "COUNTRY" + ': '+ getLS("COUNTRY"));
+            itemlist.push( "POL_LEAN" + ': '+ getLS("GROUP_IDENTITY"));
+
+            for (var i = 0; i < getCount(); i++) {
+                key = i.toString();
+                itemlist.push( getLS(key) );
+            }
+            tosend = itemlist.join('<br>');
+            console.log(tosend);
+            return tosend;
+        };
+    </script>
+</head>
+<body id="print">
+
+</body>
+</html>
