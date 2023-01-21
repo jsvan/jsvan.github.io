@@ -8,7 +8,7 @@
     </h1>
         <ol> 
         <li>
-            <h4>A browser plug in that compares the opinions you're reading with some global "average". </h4>
+            <h2>A browser plug in that compares the opinions you're reading with some global "average". </h2>
             I believe it would be most interestijng to compare what one reads with the "average", and therefore requires scraping/processing/analyzing news data from around the world to build senses of popular topics, moving averages, and opinion discontinuities.
             Many books about propaganda and history show that societies can be steered in dangerous directions shortly after a "top down" order is given to create a villain. 
             For just one historical example, in The World of Yesterday, WWI was not a foregone conclusion after the assassination of Archduke Franz Ferdinand. 
@@ -17,52 +17,52 @@
                 See proof of concept of how different news media quantifiably represent different opinions <a href="https://github.com/jsvan/news_analysis">here.</a>
                 </li>
         <li>
-            <h4> Or to see where opinions stem from.</h4>
+            <h2> Or to see where opinions stem from.</h2>
             That commentator you're reading with the strong opinions, where'd he get those ideas from? A government group? Think tank? Organization? 
             Do these opinions match what experts tend to say, or angry idiots? Which experts? Which angry idiots? To make it easier, assume a hub-spoke topology. 
                 Which opinions aline with which hubs? Could be a softmax distribution over all possible hubs. 
         </li>
         <li>
-            <h4>What do children learn in school?</h4>
+            <h2>What do children learn in school?</h2>
             A world analyse of what different countries and regions teach their children. 
             Analyse textbooks and curricula, and see what the expected worldview of how a kid growing up in Mexico would differ from Kazakhstan. 
             How can we distil key differences in worldview/historical perspectives from text?
         </li>
         <li>
-            <h4>Identify how acceptable morals/values/behaviour has changed over time. </h4>
+            <h2>Identify how acceptable morals/values/behaviour has changed over time. </h2>
             For example, the WWI book, The Good Soldier Svejk is filled with whimsical stories of violence and what today would now be considered casual torture.
             I can't imagine such stories even being told today without incurring complete social segregation as well as a forced psychiatric evaluation. 
             Therefore, can we identify how the "overton window" of social behaviour has changed over time, using literature? 
             How could we make an NLP model to archive this?
         </li>
         <li>
-            <h4>Conversation to Topic Trees </h4>
+            <h2>Conversation to Topic Trees </h2>
             What algorithm can be used to chunk text heirarchically into topics/subtopics? Conversations bounce from topic to topic, then back to previous topics, etc. 
             How can we automatically map this? 
             Combine this with <a href="https://huggingface.co/openai/whisper-large">Huggingface's whisper model for speech to text</a> for a convenient tool. 
             Can you find patterns of social dynamics and relationships based on the shape of topic trees?
         </li>
          <li>
-                 <h4>Chrome extension that helps you learn foreign vocab by replacing random words in your webpages with foreign words.</h4>
+                 <h2>Chrome extension that helps you learn foreign vocab by replacing random words in your webpages with foreign words.</h2>
                  See: <a href="https://github.com/jsvan/-glish">the code on my github</a> and 
                  <a href="https://chrome.google.com/webstore/detail/glish/jfheijenmheiialipkmahkhcdmfefclb/related?hl=en&authuser=1">the chrome store listing</a>. 
                  So far it does word replacements from translations that were scraped from wikipedia, but TODO: I would like to use Firefox's Bergamot inbrowser neural translator to
                  translate sentences/words accurately. Will have to handle word alignment, and potentially grabbing multiple possible word translations. 
         </li> 
         <li>
-                <h4>Simplify navigating complex public transportation systems</h4>
+                <h2>Simplify navigating complex public transportation systems</h2>
                 I got lost/confused/missed some trains while navigating the German public transportation systems. How would attaching Bloom Filters to bus stops help interpretability?
                 Is it possible to know where you should wait, and which bus/train you should get on by comparing some images, rather than reading through lists of busses and stops?
                 <a href="https://github.com/jsvan/BusStopBloomfilter">Read my proof of concept here.</a>
         </li>
-        <li><h4>Make a chrome extension to collect language datasets for rare sentences.</h4>
+        <li><h2>Make a chrome extension to collect language datasets for rare sentences.</h2>
                         Sometimes you're looking to train a language model on sentences that don't appear in any corpus, and must be collected by hand. This extension allows for
                         hand picked collection of sentences, and labelling of sentences as they are discovered in the wild. Use annotators to surf the web as they normally do,
                         but collect interesting samples as necessary. <a href="https://github.com/jsvan/CommonSents">This project here</a> helped me collect a fine grained sentiment dataset for news sentences, for supportive/not statements about people/places/things.
                         
         </li>
         <li>
-                <h4>Can people understand vague translations better by swiftly replacing words with all approximate translations? </h4>   
+                <h2>Can people understand vague translations better by swiftly replacing words with all approximate translations? </h2>   
                 View the very very basic preliminary test <a href="https://github.com/jsvan/flashingwords">here.</a> Translating sentences is hard. Sometimes
         there is no best translation. Sometimes a word cannot be translated, but can be approximated by a few different words, the "average" of which correspond
         to the concept in consideration. What is the best way to implant this averaged idea into people's brains? Can rapidly rotating through the words implant the idea,
