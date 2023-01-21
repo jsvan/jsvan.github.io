@@ -41,6 +41,33 @@
             Combine this with <a href="https://huggingface.co/openai/whisper-large">Huggingface's whisper model for speech to text</a> for a convenient tool. 
             Can you find patterns of social dynamics and relationships based on the shape of topic trees?
         </li>
+         <li>
+                 <h4>Chrome extension that helps you learn foreign vocab by replacing random words in your webpages with foreign words.</h4>
+                 See: <a href="https://github.com/jsvan/-glish">the code on my github</a> and 
+                 <a href="https://chrome.google.com/webstore/detail/glish/jfheijenmheiialipkmahkhcdmfefclb/related?hl=en&authuser=1">the chrome store listing</a>. 
+                 So far it does word replacements from translations that were scraped from wikipedia, but TODO: I would like to use Firefox's Bergamot inbrowser neural translator to
+                 translate sentences/words accurately. Will have to handle word alignment, and potentially grabbing multiple possible word translations. 
+        </li> 
+        <li>
+                <h4>Simplify navigating complex public transportation systems</h4>
+                I got lost/confused/missed some trains while navigating the German public transportation systems. How would attaching Bloom Filters to bus stops help interpretability?
+                Is it possible to know where you should wait, and which bus/train you should get on by comparing some images, rather than reading through lists of busses and stops?
+                <a href="https://github.com/jsvan/BusStopBloomfilter">Read my proof of concept here.</a>
+        </li>
+        <li><h4>Make a chrome extension to collect language datasets for rare sentences.</h4>
+                        Sometimes you're looking to train a language model on sentences that don't appear in any corpus, and must be collected by hand. This extension allows for
+                        hand picked collection of sentences, and labelling of sentences as they are discovered in the wild. Use annotators to surf the web as they normally do,
+                        but collect interesting samples as necessary. <a href="https://github.com/jsvan/CommonSents">This project here</a> helped me collect a fine grained sentiment dataset for news sentences, for supportive/not statements about people/places/things.
+                        
+        </li>
+        <li>
+                <hr>Can people understand vague translations better by swiftly replacing words with all approximate translations? </hr>   
+                View the very very basic preliminary test <a href="https://github.com/jsvan/flashingwords">here.</a> Translating sentences is hard. Sometimes
+        there is no best translation. Sometimes a word cannot be translated, but can be approximated by a few different words, the "average" of which correspond
+        to the concept in consideration. What is the best way to implant this averaged idea into people's brains? Can rapidly rotating through the words implant the idea,
+        in the same way that flashing text could implant subconscious ideas using <a href="https://en.wikipedia.org/wiki/Subliminal_stimuli#Word_and_non-word_stimuli">
+        subliminal messaging</a>, popular in the '80's I guess, to efficiently impart a more accurate translation?
+        </li>
                 
                 <br>
         <li>
