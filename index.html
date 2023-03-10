@@ -3,6 +3,40 @@
         Julian Vanecek's github
 </head>
 <body>
+        <h1>
+        List of side ideas I would like to do/see and have done:
+    </h1>
+        <ol>
+         <li>
+                 <h3>Chrome extension that helps you learn foreign vocab by replacing random words in your webpages with foreign words.</h3>
+                 See: <a href="https://github.com/jsvan/-glish">the code on my github</a> and 
+                 <a href="https://chrome.google.com/webstore/detail/glish/jfheijenmheiialipkmahkhcdmfefclb/related?hl=en&authuser=1">the chrome store listing</a>. 
+                 So far it does word replacements from translations that were scraped from wikipedia, but TODO: I would like to use Firefox's Bergamot inbrowser neural translator to
+                 translate sentences/words accurately. Will have to handle word alignment, and potentially grabbing multiple possible word translations. 
+        </li> 
+        <li>
+                <h3>Simplify navigating complex public transportation systems</h3>
+                I got lost/confused/missed some trains while navigating the German public transportation systems. How would attaching Bloom Filters to bus stops help interpretability?
+                Is it possible to know where you should wait, and which bus/train you should get on by comparing some images, rather than reading through lists of busses and stops?
+                <a href="https://github.com/jsvan/BusStopBloomfilter">Read my proof of concept here.</a>
+        </li>
+        <li><h3>Make a chrome extension to collect language datasets for rare sentences.</h3>
+                        Sometimes you're looking to train a language model on sentences that don't appear in any corpus, and must be collected by hand. This extension allows for
+                        hand picked collection of sentences, and labelling of sentences as they are discovered in the wild. Use annotators to surf the web as they normally do,
+                        but collect interesting samples as necessary. <a href="https://github.com/jsvan/CommonSents">This project here</a> helped me collect a fine grained sentiment dataset for news sentences, for supportive/not statements about people/places/things.
+                        
+        </li>
+                 <li>
+            <h3>Proof of Concept: A browser plug in that compares the opinions you're reading with some global "average". </h3>
+            I believe it would be most interestijng to compare what one reads with the "average", and therefore requires scraping/processing/analyzing news data from around the world to build senses of popular topics, moving averages, and opinion discontinuities.
+            Many books about propaganda and history show that societies can be steered in dangerous directions shortly after a "top down" order is given to create a villain. 
+            For just one historical example, in The World of Yesterday, WWI was not a foregone conclusion after the assassination of Archduke Franz Ferdinand. 
+            The tone in Austria wasn't of anger, or scape goating, until about a week after the incident. At that point hit pieces appeared in all the newspapers blaming Serbia and seeking redemption. 
+            I believe having a computational model scanning for these mood changes will help extinguish a bit of the frenzy by providing outside perspective based on the "average". 
+                See proof of concept of how different news media quantifiably represent different opinions <a href="https://github.com/jsvan/news_analysis">here.</a>
+                </li>
+        </ol>
+       
     <h1>
         List of ideas I would like to do/see:
     </h1>
@@ -21,15 +55,7 @@
                         then those who read edited news stories should see their opinions change over time to be less extreme if their articles
                         are algorithmically rewritten to not be filled with so many emotional flags of criticism or complements.
                 </li>
-        <li>
-            <h3>A browser plug in that compares the opinions you're reading with some global "average". </h3>
-            I believe it would be most interestijng to compare what one reads with the "average", and therefore requires scraping/processing/analyzing news data from around the world to build senses of popular topics, moving averages, and opinion discontinuities.
-            Many books about propaganda and history show that societies can be steered in dangerous directions shortly after a "top down" order is given to create a villain. 
-            For just one historical example, in The World of Yesterday, WWI was not a foregone conclusion after the assassination of Archduke Franz Ferdinand. 
-            The tone in Austria wasn't of anger, or scape goating, until about a week after the incident. At that point hit pieces appeared in all the newspapers blaming Serbia and seeking redemption. 
-            I believe having a computational model scanning for these mood changes will help extinguish a bit of the frenzy by providing outside perspective based on the "average". 
-                See proof of concept of how different news media quantifiably represent different opinions <a href="https://github.com/jsvan/news_analysis">here.</a>
-                </li>
+       
         <li>
             <h3> Or to see where opinions stem from.</h3>
             That commentator you're reading with the strong opinions, where'd he get those ideas from? A government group? Think tank? Organization? 
@@ -56,25 +82,7 @@
             Combine this with <a href="https://huggingface.co/openai/whisper-large">Huggingface's whisper model for speech to text</a> for a convenient tool. 
             Can you find patterns of social dynamics and relationships based on the shape of topic trees?
         </li>
-         <li>
-                 <h3>Chrome extension that helps you learn foreign vocab by replacing random words in your webpages with foreign words.</h3>
-                 See: <a href="https://github.com/jsvan/-glish">the code on my github</a> and 
-                 <a href="https://chrome.google.com/webstore/detail/glish/jfheijenmheiialipkmahkhcdmfefclb/related?hl=en&authuser=1">the chrome store listing</a>. 
-                 So far it does word replacements from translations that were scraped from wikipedia, but TODO: I would like to use Firefox's Bergamot inbrowser neural translator to
-                 translate sentences/words accurately. Will have to handle word alignment, and potentially grabbing multiple possible word translations. 
-        </li> 
-        <li>
-                <h3>Simplify navigating complex public transportation systems</h3>
-                I got lost/confused/missed some trains while navigating the German public transportation systems. How would attaching Bloom Filters to bus stops help interpretability?
-                Is it possible to know where you should wait, and which bus/train you should get on by comparing some images, rather than reading through lists of busses and stops?
-                <a href="https://github.com/jsvan/BusStopBloomfilter">Read my proof of concept here.</a>
-        </li>
-        <li><h3>Make a chrome extension to collect language datasets for rare sentences.</h3>
-                        Sometimes you're looking to train a language model on sentences that don't appear in any corpus, and must be collected by hand. This extension allows for
-                        hand picked collection of sentences, and labelling of sentences as they are discovered in the wild. Use annotators to surf the web as they normally do,
-                        but collect interesting samples as necessary. <a href="https://github.com/jsvan/CommonSents">This project here</a> helped me collect a fine grained sentiment dataset for news sentences, for supportive/not statements about people/places/things.
-                        
-        </li>
+      
         <li>
                 <h3>Can people understand vague translations better by swiftly replacing words with all approximate translations? </h3>   
                 View the very very basic preliminary test <a href="https://github.com/jsvan/flashingwords">here.</a> Translating sentences is hard. Sometimes
