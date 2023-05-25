@@ -182,12 +182,12 @@ class Music {
 		 
 		 
       function updateButton(m){
-      	m.setNumber(document.getElementById("txt").value);
 	      m.setTempo(document.getElementById("tmp").value);
 	      m.setTonic(document.getElementById("tnc").value);
-	      console.log(m.tonic)
 	      m.setWavetype(Number(document.getElementById("wav").value));
-        m.play()
+	      m.setNumber(document.getElementById("txt").value);
+
+      	      m.play()
       }
    
 		 
