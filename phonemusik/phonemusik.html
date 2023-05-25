@@ -78,16 +78,19 @@
 var options = {
 	id: "myStaff",
 	clef: "treble",
-	accidental: "flat",
-	color: "#FF0000",
+	at: "staffDiv",
+	color: "#000000"
 	scroll: false,
 }
 
 // create a new staff
 var myStaff = new Staff(options)
 
-
-
+// set notes (C major chord)
+myStaff.setNotes([60,64,67]);
+console.log(myStaff.getNotes());
+		
+	
 
 class Music {
 	
