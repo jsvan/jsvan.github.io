@@ -198,7 +198,13 @@ class Music {
 		oscillator.stop(this.audioCtx.currentTime + (256 / (this.notes[i][1] * this.tempo)) );
 	}
 }		 
-		 
+	function updateButton(m){
+	      m.setTempo(document.getElementById("tmp").value);
+	      m.setTonic(document.getElementById("tnc").value);
+	      m.setWavetype(Number(document.getElementById("wav").value));
+		m.setNumber(document.getElementById("txt").value);
+        	m.play() 
+	}
      const m = new Music();
      document.getElementById('btn').addEventListener('click', ()=>{updateButton(m)} );
 		 
