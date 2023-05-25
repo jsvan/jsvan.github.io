@@ -13,7 +13,7 @@
       <label for="txt">Phone number: </label><br><input type = "text" size = "20" id = "txt" value="+1 (202) 456-1414" ></input>
       <br><br>
       
-	  <label for="tmp">Tempo (140 default): </label><br><input type = "text" size = "6" id = "tmp" value="130" ></input>
+	  <label for="tmp">Tempo (140 default): </label><br><input type = "text" size = "6" id = "tmp" value="140" ></input>
 	
 	<br><br>
 	<label for="tnc">Tonic note in Hz, ie frequency <br>(262 is middle C / default, 440 is the great tuning A: </label><br><input type = "text" size = "6" id = "tnc" value="262" ></input>
@@ -43,7 +43,7 @@
       
 class Music {
 	
-	constructor(tonic=262, tempo=140, number="+1 202 456 1414", rhythm = [], wavetype = 2){
+	constructor(tonic=262, tempo=140, number="+1 202 456 1414", rhythm = [], wavetype = 0){
 		this.tonic = tonic;
 		this.tempo = tempo;
 		this.semitone = 1.0595;
