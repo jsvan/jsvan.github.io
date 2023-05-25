@@ -33,7 +33,7 @@
 		is associated with its scale degree, where 1 is tonic, 5 is the fifth, 8 is the octave. 
 		I use a major scale (for now). 0's are somewhat of a wild card, and I use advanced 
 		AI decision making techniques to send it to either the upper or the lower octave. 
-		Its up to you to remember which are the 0's :)
+		0's are also played by a double 8th hit, to differentiate them. Hope you get what I mean :)
 </p>
 <br><br><br><br>
     </div>
@@ -48,6 +48,7 @@ class Music {
 		this.tonic = tonic;
 		this.tempo = tempo;
 		this.semitone = 1.0595;
+		this.E = 8;
 		this.Q = 4;
 		this.H = 2;
 		this.W = 1;
@@ -101,18 +102,21 @@ class Music {
 
 	processNumber(){
 	  let res = [];
-	  let n = -1;
+	  let n;
 	  let modL = (this.number.length + 1) % 3
+	  let r;
 	  for (let i = 0; i < this.number.length; i++){
-
+		r = (i == this.number.length - 1) ? this.H : this.Q ;
 		n = Number(this.number[i]);
 		if (n == 0) {
 			n = this.handleZero(i, this.number);
 			this.preZ = n;
+			r = this.E;
+			res.push([this.tonic * this.notemap.get(n), r]); // 2x eighth note
 		}
-		res.push(this.tonic * this.notemap.get(n));
+		res.push([this.tonic * this.notemap.get(n), r]);
 	  	if ( i % 3 == modL && i+3 < this.number.length){
-	  		res.push(0); // rest
+	  		res.push([0, this.Q]); // rest
 	  	}
 	  }
 	  return res;
@@ -165,15 +169,16 @@ class Music {
 	playNote(i, callback) {
 		// create Oscillator node
 		let oscillator = this.audioCtx.createOscillator();
-		let rhythm = (i == this.notes.length - 1) ? this.H : this.Q ;
 		oscillator.type = this.wavetype;
-		oscillator.frequency.value = this.notes[i]; // value in hertz
+		oscillator.frequency.value = this.notes[i][0]; // value in hertz
 		oscillator.connect(this.audioCtx.destination);
 		oscillator.onended = callback;
 		oscillator.start(0);
-		oscillator.stop(this.audioCtx.currentTime + (256 / (rhythm * this.tempo)) );
+		oscillator.stop(this.audioCtx.currentTime + (256 / (this.notes[i][1] * this.tempo)) );
 	}
 }
+		 
+		 
       function updateButton(m){
       	m.setNumber(document.getElementById("txt").value);
 	      m.setTempo(document.getElementById("tmp").value);
