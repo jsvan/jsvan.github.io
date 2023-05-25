@@ -1,6 +1,13 @@
 <html>
   <head>
-   
+	  <!-- from https://github.com/instrumentbible/staff.js#readme -->
+   <!-- import CSS -->
+<link rel="stylesheet" href="css/staff.css" />
+
+<!-- import JavaScript -->
+<script src="js/JZZ.js"></script>
+<script src="js/JZZ.input.Kbd.js"></script>
+<script src="js/staff.js"></script>
     
   </head>
   <body style="background-repeat: repeat; background-image:url('https://cliparting.com/wp-content/uploads/2016/10/Telephone-clip-art-phone-clipart-image-7.jpg')" >
@@ -41,7 +48,42 @@
     </div>
 </div>
 	
+<br><br>
+
+<div id="myStaff"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	 <script defer>
+		 
+		 
+		 // these are the options
+var options = {
+	id: "myStaff",
+	clef: "treble",
+	accidental: "flat",
+	color: "#FF0000",
+	scroll: false,
+}
+
+// create a new staff
+var myStaff = new Staff(options)
+
+
+
+
 class Music {
 	
 	constructor(number="+1 (981) 867-5309", tonic=262, tempo=200, wavetype = 3){
@@ -210,6 +252,7 @@ class Music {
 		 
 
     </script>
+
   </body>
   
 </html>
