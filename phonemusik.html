@@ -110,11 +110,11 @@ class Music {
 			return ret;
 		}
 		ret.push(this.H);
-		if (number.length == 1) {
-			return ret;
+		for (let i = 1; i < Math.min(4, number.length; i++){
+			ret.push(this.Q);
 		}
-		//ret.push(this.Q);
-		for (let i = 2; i < number.length; i++){
+		
+		for (let i = 4; i < number.length; i++){
 			if (i % 3 == 0) {
 				ret.push(this.Q)
 				ret.push(this.Q)
