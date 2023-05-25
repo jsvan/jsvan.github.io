@@ -10,7 +10,7 @@
 		<br>
 	    <button id="btn">Play!</button>
 	  <br><br>
-      <label for="txt">Phone number: </label><br><input type = "text" size = "20" id = "txt" value="+1 (202) 456-1414" ></input>
+      <label for="txt">Phone number: </label><br><input type = "text" size = "20" id = "txt" value="+1 (981) 867-5309" ></input>
       <br><br>
       
 	  <label for="tmp">Tempo (200 default): </label><br>
@@ -42,14 +42,13 @@
 </div>
 	
 	 <script defer>
-      
-
 class Music {
 	
-	constructor(tonic=262, tempo=200, number="+1 202 456 1414", wavetype = 3){
+	constructor(number="+1 (981) 867-5309", tonic=262, tempo=200, wavetype = 3){
 		this.tonic = tonic;
 		this.tempo = tempo;
 		this.semitone = 1.0595;
+		this.S = 16
 		this.E = 8;
 		this.Q = 4;
 		this.H = 2;
@@ -62,17 +61,33 @@ class Music {
 		this.allwaves = new Map([[0, 'square'], [1, 'sine'], [2, 'sawtooth'], [3, 'triangle']]);
 		
 		// maps scale degree to #semitones above root. 0 is high.
-		this.notemap = new Map([
-			[1, this.semitone ** 0], 
-			[2, this.semitone ** 2], 
-			[3, this.semitone ** 4], 
-			[4, this.semitone ** 5], 
-			[5, this.semitone ** 7], 
-			[6, this.semitone ** 9], 
-			[7, this.semitone ** 11], 
-			[8, this.semitone ** 12], 
-			[9, this.semitone ** 14], 
-			[0, this.semitone ** 12]]);
+		//[ I'm gonna over optimize this lol
+		//	[1, this.semitone ** 0], 
+		//	[2, this.semitone ** 2], 
+		//	[3, this.semitone ** 4], 
+		//	[4, this.semitone ** 5], 
+		//	[5, this.semitone ** 7], 
+		//	[6, this.semitone ** 9], 
+		//	[7, this.semitone ** 11], 
+		//	[8, this.semitone ** 12], 
+		//	[9, this.semitone ** 14], 
+		//	[0, this.semitone ** 12]]);
+		
+		
+		this.notemap = new Map();
+		this.notemap.set(1, this.semitone       ** 0); 					//0 half tones
+		this.notemap.set(2, this.semitone       ** 2); 					//2 half tones
+		this.notemap.set(3, this.notemap.get(2) * this.notemap.get(2)); //4 half tones
+		this.notemap.set(4, this.semitone 	    * this.notemap.get(3) ); //5 half tones
+		this.notemap.set(5, this.notemap.get(2) * this.notemap.get(4) ); //7 half tones
+		this.notemap.set(6, this.notemap.get(2) * this.notemap.get(5)); //9 half tones
+		this.notemap.set(7, this.notemap.get(2) * this.notemap.get(6)); // 11 half tones
+		this.notemap.set(8, this.semitone	    * this.notemap.get(7)); // 12 half tones
+		this.notemap.set(9, this.notemap.get(5) * this.notemap.get(5)); // 14 half tones
+		this.notemap.set(0, this.notemap.get(8)); 						// 12 half tones
+		
+		
+		
 		
 		// create web audio api context
 		this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -108,7 +123,7 @@ class Music {
 	  let modL = (this.number.length + 1) % 3
 	  let r;
 	  for (let i = 0; i < this.number.length; i++){
-		r = (i == this.number.length - 1) ? this.H : this.Q ;
+		r = this.Q;
 		n = Number(this.number[i]);
 		if (n == 0) {
 			n = this.handleZero(i, this.number);
@@ -116,14 +131,17 @@ class Music {
 			r = this.E;
 			res.push([this.tonic * this.notemap.get(n), r]); // 2x eighth note
 		}
+		r = (i == this.number.length - 1) ? this.H : r ;
 		res.push([this.tonic * this.notemap.get(n), r]);
 	  	if ( i % 3 == modL && i+3 < this.number.length){
 	  		res.push([0, this.Q]); // rest
+	  		this.preZ = null;
 	  	}
 	  }
 	  return res;
 	}
 	
+	// advanced AI
 	handleZero(i, num) {
 		//if 0s
 		//	and following an 8
@@ -151,6 +169,7 @@ class Music {
 			if (post == 8) return 1;
 			if (post == 1) return 8;
 		}
+		if (this.preZ!==null) return this.preZ;
 		if (pre){
 			if (pre < 6) return 1;
 			if (pre > 5) return 8;
@@ -178,19 +197,7 @@ class Music {
 		oscillator.start(0);
 		oscillator.stop(this.audioCtx.currentTime + (256 / (this.notes[i][1] * this.tempo)) );
 	}
-}
-		 
-		 
-      function updateButton(m){
-	      m.setTempo(document.getElementById("tmp").value);
-	      m.setTonic(document.getElementById("tnc").value);
-	      m.setWavetype(Number(document.getElementById("wav").value));
-	      m.setNumber(document.getElementById("txt").value);
-
-      	      m.play()
-      }
-   
-		 
+}		 
 		 
      const m = new Music();
      document.getElementById('btn').addEventListener('click', ()=>{updateButton(m)} );
