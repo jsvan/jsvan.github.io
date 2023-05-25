@@ -6,8 +6,15 @@
   <body>
     <div style="text-align:center">
       <input type = "text" size = "70" id = "txt" value="Phone number here +1 (608) 123-5679 ;)" ></input>
-      <br>
+      <br><br>
       <button id="btn">Play!</button>
+	  <br><br>
+	  <label for="tmp">Tempo</label><input type = "text" size = "70" id = "tmp" value="130" ></input>
+	<br><button id = "tmpbtn">Set</button>
+	<br><br>
+	<label for="tnc">Tonic note in Hrz, ie frequency</label><input type = "text" size = "70" id = "tnc" value="262" ></input>
+	<br><button id = "tncbtn">Set</button>
+
     </div>
 	
 	
@@ -53,7 +60,12 @@ class Music {
 		this.rhythm = this.createRhythm(this.number);
 		this.notes = this.processNumber();
 	}
-	
+	setTonic(tonic) {
+		this.tonic = Number(tonic.replace(/\D/g,''));
+	}
+	setTempo(tempo) {
+		this.tempo = Number(tempo.replace(/\D/g,''));	
+	}
 	setRhythm(rhythm){
 		if (rhythm.length == 0) {
 			rhythm = this.createRhythm(this.number);
@@ -171,9 +183,19 @@ class Music {
         m.setNumber(document.getElementById("txt").value)
         m.play()
       }
-      
+      function settmp(m){
+	      m.setTempo(document.getElementById("tmp").value);
+      }
+	function setTnc(m) {
+		m.setTonic(document.getElementById("tnc").value);
+	}
+		 
+		 
      const m = new Music();
      document.getElementById('btn').addEventListener('click', ()=>updateButton(m) );
+		      document.getElementById('tmpbtn').addEventListener('click', ()=>settmp(m) );
+     document.getElementById('tncbtn').addEventListener('click', ()=>setTnc(m) );
+
 
     </script>
   </body>
