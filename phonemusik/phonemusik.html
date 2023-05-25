@@ -50,8 +50,10 @@
 
 
 	<div id="staffDiv" class="staff">
-		<div id="myStaff"></div>
 	</div>
+
+	
+
 </div>
 	
 <br><br>
@@ -72,7 +74,7 @@
 
 
 
-	 <script defer>
+	 <script>
 		 
 		 
 		 // these are the options
@@ -90,7 +92,9 @@ var myStaff = new Staff(options)
 // set notes (C major chord)
 myStaff.setNotes([60,64,67]);
 console.log(myStaff.getNotes());
-		
+		 
+		 
+		 
 	 
 	function updateButton(m){
 	      m.setTempo(document.getElementById("tmp").value);
