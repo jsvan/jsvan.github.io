@@ -41,9 +41,10 @@
 	
 	 <script defer>
       
+
 class Music {
 	
-	constructor(tonic=262, tempo=140, number="+1 202 456 1414", rhythm = [], wavetype = 0){
+	constructor(tonic=262, tempo=140, number="+1 202 456 1414", wavetype = 0){
 		this.tonic = tonic;
 		this.tempo = tempo;
 		this.semitone = 1.0595;
@@ -52,7 +53,7 @@ class Music {
 		this.W = 1;
 		this.number;
 		this.notes;
-		this.rhythm;
+
 		this.wavetype;
 		this.preZ = null;
 		this.allwaves = new Map([[0, 'square'], [1, 'sine'], [2, 'sawtooth'], [3, 'triangle']]);
@@ -78,7 +79,6 @@ class Music {
 	
 	setNumber(number){
 		this.number = number.replace(/\D/g,'');
-		this.rhythm = this.createRhythm(this.number);
 		this.notes = this.processNumber();
 	}
 	setTonic(tonic) {
@@ -87,12 +87,7 @@ class Music {
 	setTempo(tempo) {
 		this.tempo = Number(tempo.replace(/\D/g,''));	
 	}
-	setRhythm(rhythm){
-		if (rhythm.length == 0) {
-			rhythm = this.createRhythm(this.number);
-		}
-		this.rhythm = rhythm;
-	}
+
 	
 	setWavetype(wavetype){
 		if (wavetype < 0 || wavetype >= 4) {
@@ -104,26 +99,6 @@ class Music {
 		console.log("Set wavetype to " + this.wavetype)
 	}
 	
-	createRhythm(number) {
-		let ret = [];
-		if (number.length == 0) {
-			return ret;
-		}
-		ret.push(this.H);
-		for (let i = 1; i < Math.min(4, number.length; i++){
-			ret.push(this.Q);
-		}
-		
-		for (let i = 4; i < number.length; i++){
-			if (i % 3 == 0) {
-				ret.push(this.Q)
-				ret.push(this.Q)
-			} else {
-				ret.push(this.Q)
-			}
-		}
-		return ret.reverse();
-	}
 
 	processNumber(){
 	  let res = [];
@@ -191,14 +166,14 @@ class Music {
 	playNote(i, callback) {
 		// create Oscillator node
 		let oscillator = this.audioCtx.createOscillator();
+		let rhythm = (i == this.notes.length - 1) ? this.H : this.Q ;
 		oscillator.type = this.wavetype;
 		oscillator.frequency.value = this.notes[i]; // value in hertz
 		oscillator.connect(this.audioCtx.destination);
 		oscillator.onended = callback;
 		oscillator.start(0);
-		oscillator.stop(this.audioCtx.currentTime + (256 / (this.rhythm[i] * this.tempo)) );
+		oscillator.stop(this.audioCtx.currentTime + (256 / (rhythm * this.tempo)) );
 	}
-
 }
       function updateButton(m){
       	m.setNumber(document.getElementById("txt").value);
