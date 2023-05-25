@@ -1,0 +1,178 @@
+<html>
+  <head>
+    <script>
+      
+class Music {
+	
+	constructor(tonic=262, tempo=130, number="6084363421", rhythm = [], wavetype = 2){
+		this.tonic = tonic;
+		this.tempo = tempo;
+		this.semitone = 1.0595;
+		this.Q = 4;
+		this.H = 2;
+		this.W = 1;
+		this.number;
+		this.notes;
+		this.rhythm;
+		this.wavetype;
+		this.preZ = null;
+		this.allwaves = new Map([[0, 'square'], [1, 'sine'], [2, 'sawtooth'], [3, 'triangle']]);
+		
+		// maps scale degree to #semitones above root. 0 is high.
+		this.notemap = new Map([
+			[1, this.semitone ** 0], 
+			[2, this.semitone ** 2], 
+			[3, this.semitone ** 4], 
+			[4, this.semitone ** 5], 
+			[5, this.semitone ** 7], 
+			[6, this.semitone ** 9], 
+			[7, this.semitone ** 11], 
+			[8, this.semitone ** 12], 
+			[9, this.semitone ** 14], 
+			[0, this.semitone ** 12]]);
+		
+		// create web audio api context
+		this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+		this.setNumber(number);
+		this.setWavetype(wavetype);
+	}
+	
+	setNumber(number){
+		this.number = number.replace(/\D/g,'');
+		this.rhythm = this.createRhythm(this.number);
+		this.notes = this.processNumber();
+	}
+	
+	setRhythm(rhythm){
+		if (rhythm.length == 0) {
+			rhythm = this.createRhythm(this.number);
+		}
+		this.rhythm = rhythm;
+	}
+	
+	setWavetype(wavetype){
+		if (wavetype < 0 || wavetype >= 4) {
+				wavetype = 0;
+		}
+		
+		this.wavetype = this.allwaves.get(wavetype);
+		console.log(wavetype)
+		console.log("Set wavetype to " + this.wavetype)
+	}
+	
+	createRhythm(number) {
+		let ret = [];
+		if (number.length == 0) {
+			return ret;
+		}
+		ret.push(this.H);
+		if (number.length == 1) {
+			return ret;
+		}
+		ret.push(this.Q);
+		for (let i = 2; i < number.length; i++){
+			if (i % 3 == 0) {
+				ret.push(this.Q)
+				ret.push(this.Q)
+			} else {
+				ret.push(this.Q)
+			}
+		}
+		return ret.reverse();
+	}
+
+	processNumber(){
+	  let res = [];
+	  let n = -1;
+	  let modL = (this.number.length + 1) % 3
+	  for (let i = 0; i < this.number.length; i++){
+
+		n = Number(this.number[i]);
+		if (n == 0) {
+			n = this.handleZero(i, this.number);
+			this.preZ = n;
+		}
+		res.push(this.tonic * this.notemap.get(n));
+	  	if ( i % 3 == modL && i+3 < this.number.length){
+	  		res.push(0); // rest
+	  	}
+	  }
+	  return res;
+	}
+	
+	handleZero(i, num) {
+		//if 0s
+		//	and following an 8
+		//		then make 1
+		//	and following a 1
+		//		then make 8
+		//	and preceding an 8
+		//		then make 1
+		//	and preceding a 1	
+		//		then make 8
+		//	and following a number < 5
+		//		then make 1
+		//	and following a number > 5
+		//		then make 8
+		let pre;
+		let post;
+		if (i > 0) {
+			pre = Number(num[i - 1]);
+			if (pre == 0) return this.preZ;
+			if (pre == 8) return 1;
+			if (pre == 1) return 8;
+		}
+		if (i < num.length - 1) {
+			post = Number(num[i + 1]);
+			if (post == 8) return 1;
+			if (post == 1) return 8;
+		}
+		if (pre){
+			if (pre < 6) return 1;
+			if (pre > 5) return 8;
+		}
+		if (post) {
+			if (post < 6) return 1;
+			if (post > 5) return 8;
+		}
+		return 0;
+	}
+
+	play(i=0){
+		if (i < this.notes.length) {
+		  this.playNote(i, ()=>{this.play(i+1)});
+		}
+	}
+
+	playNote(i, callback) {
+		// create Oscillator node
+		let oscillator = this.audioCtx.createOscillator();
+		oscillator.type = this.wavetype;
+		oscillator.frequency.value = this.notes[i]; // value in hertz
+		oscillator.connect(this.audioCtx.destination);
+		oscillator.onended = callback;
+		oscillator.start(0);
+		oscillator.stop(this.audioCtx.currentTime + (256 / (this.rhythm[i] * this.tempo)) );
+	}
+
+}
+      function updateButton(m){
+        m.setNumber(document.getElementById("txt").value)
+        m.play()
+      }
+      
+     const m = new Music();
+     document.getElementById('btn').addEventListener('click', ()=>updateButton(m) );
+
+    </script>
+    
+  </head>
+  <body>
+    <div style="text-align:center">
+      <input type = "text" size = "70" id = "txt" ></input>
+      <br>
+      <button id="btn">Play!</button>
+    </div>
+  </body>
+  
+</html>
