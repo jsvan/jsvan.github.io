@@ -78,7 +78,8 @@
   function renderFeatured(p) {
     const seq = ++renderSeq;
     const isDiagram = p.image.endsWith(".svg");
-    const visual = `<img class="featured-image${isDiagram ? " featured-diagram" : ""}" src="${esc(p.image)}" alt="${isDiagram ? "Diagram" : "Screenshot"} of ${esc(p.title)}">`;
+    const alt = p.alt || `${isDiagram ? "Diagram" : "Screenshot"} of ${p.title}`;
+    const visual = `<img class="featured-image${isDiagram ? " featured-diagram" : ""}" src="${esc(p.image)}" alt="${esc(alt)}">`;
     featured.innerHTML = `
       ${link(p, visual, "featured-image-link")}
       <div class="featured-body">
@@ -87,6 +88,10 @@
         <article class="featured-essay"><p class="essay-loading">Loading…</p></article>
       </div>`;
     featured.scrollTop = 0;
+    // Missing image (e.g. the photo isn't added yet): keep the grey box, not a broken icon.
+    featured.querySelector(".featured-image").addEventListener("error", (e) => {
+      e.target.replaceWith(Object.assign(document.createElement("div"), { className: "featured-image" }));
+    });
 
     const essayEl = featured.querySelector(".featured-essay");
     loadEssay(p.essay).then((html) => {
@@ -95,9 +100,9 @@
   }
 
   function select(p, fromClick) {
-    const row = rows.get(p.id);
+    const row = rows.get(p.id) || null;
     if (activeRow) activeRow.classList.remove("active");
-    row.classList.add("active");
+    if (row) row.classList.add("active");
     activeRow = row;
     renderFeatured(p);
     if (fromClick) {
@@ -126,7 +131,7 @@
   }
 
   const wanted = new URLSearchParams(location.search).get("p");
-  select(all.find((p) => p.id === wanted) || all[0], false);
+  select(all.find((p) => p.id === wanted) || window.ABOUT, false);
   // Warm the cache so switching projects feels instant.
-  all.forEach((p) => loadEssay(p.essay));
+  [window.ABOUT, ...all].forEach((p) => loadEssay(p.essay));
 })();

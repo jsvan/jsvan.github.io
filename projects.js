@@ -3,6 +3,18 @@
 // short unpunctuated lines = headings, Markdown #/-/** also work).
 // `url` makes the image and title clickable. Work diagrams are static SVGs
 // rendered from diagrams/*.mmd by tools/render-diagrams.mjs.
+// Landing panel, shown when no ?p= is given. Not listed in the sidebar;
+// the brand link in the top bar returns to it.
+window.ABOUT = {
+  id: "about",
+  title: "About",
+  tagline: "Weekend projects, and the work that pays for them.",
+  image: "images/me.jpg",
+  alt: "Photo of Julian Vanecek",
+  essay: "essays/personal_essay.txt",
+  url: "https://github.com/jsvan",
+};
+
 window.FOLDERS = [
   {
     name: "Projects",
