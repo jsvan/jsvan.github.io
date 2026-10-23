@@ -3,12 +3,13 @@
 // short unpunctuated lines = headings, Markdown #/-/** also work).
 // `url` makes the image and title clickable. Work diagrams are static SVGs
 // rendered from diagrams/*.mmd by tools/render-diagrams.mjs.
-// Landing panel, shown when no ?p= is given. Not listed in the sidebar;
-// the brand link in the top bar returns to it.
-window.ABOUT = {
-  id: "about",
-  title: "About",
-  tagline: "Weekend projects, and the work that pays for them.",
+// Landing panel, shown when no ?p= is given. "Home" heads the sidebar with
+// no rows under it; clicking it, a row's X, or anywhere off the panel returns here.
+// The tagline is the essay's first line, so it is dropped from the essay body.
+window.HOME = {
+  id: "home",
+  title: "Home",
+  tagline: '"You hypocrites! You know how to interpret the appearance of the earth and the sky; why do you not know how to interpret the present time?"',
   image: "images/me.jpg",
   alt: "Photo of Julian Vanecek",
   essay: "essays/personal_essay.txt",

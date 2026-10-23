@@ -56,7 +56,8 @@
     return out.join("\n");
   }
 
-  function loadEssay(path) {
+  function loadEssay(p) {
+    const path = p.essay;
     if (!essayCache.has(path)) {
       essayCache.set(
         path,
@@ -65,6 +66,8 @@
             if (!r.ok) throw new Error(r.status);
             return r.text();
           })
+          // An essay that opens with its own tagline would show it twice.
+          .then((t) => (t.trimStart().startsWith(p.tagline) ? t.trimStart().slice(p.tagline.length) : t))
           .then(renderEssay)
           .catch(() => '<p class="essay-error">This essay could not be loaded. If you opened the file directly, serve the folder instead (python3 -m http.server).</p>')
       );
@@ -94,7 +97,7 @@
     });
 
     const essayEl = featured.querySelector(".featured-essay");
-    loadEssay(p.essay).then((html) => {
+    loadEssay(p).then((html) => {
       if (seq === renderSeq) essayEl.innerHTML = html;
     });
   }
@@ -105,11 +108,21 @@
     if (row) row.classList.add("active");
     activeRow = row;
     renderFeatured(p);
+    current = p;
     if (fromClick) {
-      history.replaceState(null, "", `?p=${p.id}`);
-      if (window.matchMedia("(max-width: 768px)").matches) featured.scrollIntoView({ behavior: "smooth" });
+      history.replaceState(null, "", p === HOME ? location.pathname : `?p=${p.id}`);
+      if (p !== HOME && window.matchMedia("(max-width: 768px)").matches) featured.scrollIntoView({ behavior: "smooth" });
     }
   }
+
+  const HOME = window.HOME;
+  let current = null;
+  const goHome = () => { if (current !== HOME) select(HOME, true); };
+
+  const homeLabel = document.createElement("h2");
+  homeLabel.className = "sidebar-folder-name sidebar-home";
+  homeLabel.textContent = HOME.title;
+  sidebar.append(homeLabel);
 
   const all = [];
   for (const folder of window.FOLDERS) {
@@ -122,8 +135,11 @@
       all.push(p);
       const row = document.createElement("button");
       row.className = "sidebar-row";
-      row.innerHTML = `<h3 class="sidebar-row-title">${esc(p.title)}</h3><div class="sidebar-row-meta">${esc(p.tagline)}</div>`;
-      row.addEventListener("click", () => select(p, true));
+      row.innerHTML = `<h3 class="sidebar-row-title">${esc(p.title)}</h3><div class="sidebar-row-meta">${esc(p.tagline)}</div><span class="sidebar-row-close" aria-label="Close, back to Home" title="Back to Home">×</span>`;
+      row.addEventListener("click", (e) => {
+        if (e.target.closest(".sidebar-row-close")) goHome();
+        else select(p, true);
+      });
       rows.set(p.id, row);
       group.appendChild(row);
     }
@@ -131,7 +147,14 @@
   }
 
   const wanted = new URLSearchParams(location.search).get("p");
-  select(all.find((p) => p.id === wanted) || window.ABOUT, false);
+  select(all.find((p) => p.id === wanted) || HOME, false);
   // Warm the cache so switching projects feels instant.
-  [window.ABOUT, ...all].forEach((p) => loadEssay(p.essay));
+  [HOME, ...all].forEach(loadEssay);
+
+  // A click anywhere off the open project goes Home. Rows handle their own
+  // clicks (including the X), and links open in a new tab.
+  document.addEventListener("click", (e) => {
+    if (featured.contains(e.target) || e.target.closest(".sidebar-row, a")) return;
+    goHome();
+  });
 })();
