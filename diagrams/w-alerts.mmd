@@ -1,0 +1,9 @@
+flowchart TD
+  C["Dashboard: Ask AI on alert"] -->|"type=alert, alertID"| API[Same query endpoint]
+  API --> H[Load thread history]
+  API --> P["Alert system prompt<br/>+ code description from codes module"]
+  H --> L{{Agent loop}}
+  P --> L
+  L <-->|search| R["documents tool<br/>drop below 0.30, tag 0.30-0.50,<br/>add retrieval-quality note"]
+  L <-->|live data| T["Product tools<br/>network, client, policy"]
+  L --> O["Answer: 1) What happened<br/>2) Probable cause 3) Troubleshooting"]

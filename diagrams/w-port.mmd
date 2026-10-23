@@ -1,0 +1,8 @@
+flowchart TD
+  REQ[Query endpoint] --> TY{message type}
+  TY -->|log analysis| RCA["Root-cause path: compiled per request<br/>executor + code agent"]
+  TY -->|user| ORCH{{"Orchestrator<br/>fleet compiled at startup"}}
+  TY -->|alert| AL[Alert agent]
+  ORCH -->|handoff| DOC[docs]
+  ORCH -->|handoff| DIA[diagnostics]
+  ORCH -->|handoff| CFG[config]

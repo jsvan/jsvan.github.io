@@ -1,0 +1,16 @@
+In production, Gemini invented a search tool that didn't exist, hit 400 errors on empty message parts, and sometimes returned a dead, empty response.
+
+## Rejected
+Forcing a tool call on every turn. It doesn't stop the model from inventing tool names.
+
+## What I fixed
+- A placeholder for empty message parts.
+- Explicit errors on a missing message and on malformed function calls.
+- Checked type assertions.
+- Unparseable tool arguments are returned to the model as an error instead of crashing the turn.
+
+## Hallucinated tools
+The second product line kept calling tools it didn't have, because the shared prompt described tools that only the first product had. I removed tool catalogs from the prompts entirely, so the runtime's tool list is the single source of truth.
+
+## Outcome
+The core fixes merged. Retries and timeouts were superseded by a teammate's retry-with-backoff and by the later guardrail work.

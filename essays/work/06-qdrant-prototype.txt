@@ -1,0 +1,11 @@
+We wanted control over chunking and metadata, and better multilingual retrieval, which the retrieval research had pointed to.
+
+## Design
+- Qdrant behind the documents tool, with Gemini embeddings.
+- Heading-breadcrumb metadata on every chunk.
+- Ingestion moved offline.
+- The top search results are injected for the current request only, so they never enter chat history.
+- Packaged as a minimal patch that applies cleanly onto main.
+
+## Outcome
+Never merged; production stayed on the hosted store.

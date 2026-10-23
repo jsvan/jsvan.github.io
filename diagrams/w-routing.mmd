@@ -1,0 +1,5 @@
+flowchart LR
+  T[Turn arrives] --> C{"type == alert<br/>and fleet has alert agent?"}
+  C -->|yes| A["Alert agent<br/>3-section format"]
+  C -->|"no, log a warning"| O[Orchestrator]
+  F[Follow-up in alert thread] --> O

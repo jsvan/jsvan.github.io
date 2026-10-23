@@ -1,0 +1,14 @@
+On the new multi-agent fleet, the alert agent was reached only if the model decided to route there, and the second product had no alert agent at all. The three-section format was lost, and the alert test fell to 3/5.
+
+## Fix
+- An alert agent for the second product.
+- The entry agent is chosen by message type, with a logged fallback.
+- Follow-up questions stay on the orchestrator.
+
+The principle: route typed UI actions deterministically. Don't ask a model to rediscover something the UI already knows.
+
+## Routing tests
+- I rejected a production test-mode flag.
+- Instead, the full pipeline runs, and each route is graded from the orchestrator's handoff log line, promoted from debug to info.
+- 20 cases, 4 per route, sent sequentially.
+- This surfaced a real bug: the orchestrator's YAML told the model to call delegate-prefixed tools, while the code registered them without the prefix.

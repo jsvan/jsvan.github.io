@@ -1,0 +1,194 @@
+/* Layout and type follow the kreslit.com landing page
+   (graphic_novels/game/website/src/style.css). */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root { --bg: #f4f1ec; }
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 12px;
+}
+
+button { font: inherit; color: inherit; background: none; border: none; text-align: left; width: 100%; }
+
+.landing-container {
+  width: 1280px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 24px);
+  overflow: hidden;
+}
+
+/* ---- Top bar ---- */
+.landing-topbar {
+  padding: 16px 32px;
+  border-bottom: 1px solid #d4cfc6;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+  position: relative;
+  min-height: 60px;
+}
+.landing-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.landing-brand:hover { color: #555; }
+.topbar-links { margin-left: auto; display: flex; gap: 18px; }
+.topbar-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+  text-decoration: none;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.topbar-link:hover { color: #555; }
+
+/* ---- Body: featured (left) + list (right) ---- */
+.landing-body {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+  gap: 48px;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+.landing-featured { flex: 1; min-width: 0; overflow-y: auto; padding-right: 8px; }
+
+.featured-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 2px;
+  background: #ddd;
+  display: block;
+}
+.featured-body { padding: 20px 0 32px; }
+.featured-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.featured-title a { color: inherit; text-decoration: none; }
+.featured-title a:hover { color: #444; }
+.featured-image-link { display: block; }
+.featured-summary {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #777;
+  margin-bottom: 20px;
+}
+
+/* Work items: static SVG diagrams, shrunk to fit but never enlarged */
+.featured-diagram {
+  object-fit: scale-down;
+  background: #ebe6dd;
+  padding: 24px;
+}
+
+/* ---- Essay ---- */
+.featured-essay {
+  border-top: 1px solid #e0dbd2;
+  padding-top: 24px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+  max-width: 68ch;
+}
+.featured-essay p, .featured-essay ul, .featured-essay ol { margin-bottom: 16px; }
+.featured-essay ul, .featured-essay ol { padding-left: 22px; }
+.featured-essay li { margin-bottom: 4px; }
+.featured-essay a { color: #1a1a1a; text-underline-offset: 2px; word-break: break-word; }
+.featured-essay code { font-size: 13px; background: #e8e4de; padding: 1px 5px; border-radius: 2px; }
+.essay-heading {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin: 28px 0 10px;
+}
+.essay-loading, .essay-error { color: #999; }
+
+/* ---- Sidebar list ---- */
+.landing-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid #d4cfc6;
+  padding-left: 32px;
+  overflow-y: auto;
+}
+.sidebar-folder-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin: 28px 0 8px;
+}
+.sidebar-folder-name:first-child { margin-top: 0; }
+
+.sidebar-row {
+  display: block;
+  padding: 14px 8px;
+  border-bottom: 1px solid #e0dbd2;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sidebar-row:hover { background: rgba(0, 0, 0, 0.03); }
+.sidebar-row.active { background: rgba(0, 0, 0, 0.05); }
+.sidebar-row.active .sidebar-row-title { color: #1a1a1a; }
+.sidebar-row:focus-visible { outline: 2px solid #8a8273; outline-offset: -2px; }
+.sidebar-row-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.sidebar-row-meta { font-size: 11px; font-weight: 500; color: #999; line-height: 1.4; }
+
+/* ---- Mobile ---- */
+@media (max-width: 768px) {
+  body { padding: 0; padding-top: env(safe-area-inset-top); }
+  .landing-container { height: auto; overflow: visible; }
+  .landing-topbar { padding: 16px; }
+  .landing-brand { position: static; transform: none; font-size: 18px; letter-spacing: 3px; }
+  .landing-body { flex-direction: column; padding: 20px 16px; gap: 24px; }
+  .landing-featured { overflow: visible; padding-right: 0; }
+  /* List goes first on phones: the essays are long, so it would be lost below them. */
+  .landing-sidebar {
+    order: -1;
+    width: 100%;
+    border-left: none;
+    padding-left: 0;
+    border-bottom: 1px solid #d4cfc6;
+    padding-bottom: 16px;
+    overflow: visible;
+  }
+  .landing-featured { scroll-margin-top: 12px; }
+}

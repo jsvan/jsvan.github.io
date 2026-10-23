@@ -1,0 +1,14 @@
+"Ask AI" on a dashboard alert should explain what happened, the probable cause, and how to troubleshoot it.
+
+## Options I weighed
+- A new endpoint, or a new message type on the existing one. I chose the message type, because it reuses threads and history.
+- Rely on retrieval to find what an alert code means, or inject it. I injected it.
+
+## What I built
+- An alert message type with its own system prompt, and a required three-section answer.
+- The authoritative alert-code description injected from the codes module.
+- The prompt stays server-side; only the alert itself is stored in history.
+- A retrieval quality filter: drop chunks scoring below 0.30, tag those between 0.30 and 0.50 as low similarity, add a note telling the model retrieval was weak and to retry broader, and return 20 results instead of 10.
+
+## Outcome
+Merged. One flaw I found later: a tool alias pointed at a misspelled tool name, so it never matched.

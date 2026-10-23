@@ -1,0 +1,31 @@
+Answer questions about a customer's diagnostic dump (logs, packet captures, Kubernetes state, configs) with a cited root cause. The dumps are large and noisy: one log is 66 MB, and alarming-looking lines are often routine.
+
+## Tool design
+- tshark instead of Go's gopacket, because gopacket can't decode NGAP, PFCP or HTTP/2 service traffic. tshark costs about 50 MB of image size and a subprocess per call.
+- Six read-only tools: list, read, grep, log-template dedup, pcap summary, and pcap packet. The dump path is bound when the tools are created, so the model never sees filesystem paths. Commands run without a shell, and output is capped at 64 KB.
+- Processing happens on demand in memory, rather than writing preprocessed copies to disk.
+- The tools are registered per request, so normal chat never sees them.
+
+## How it evolved
+- The agent silently swapped in a different file when the requested one was missing. Fix: plan, then execute, with the file inventory fetched before planning.
+- A "Hey" at the start of a chat triggered a full investigation. Fix: a cheap classifier in front.
+- With gpt-4.1 and extra pipeline stages, quality was a coin flip at 2 to 4 out of 5; more structure gave the illusion of understanding. Fix: a reasoning model at about the same price.
+- That left about 2,100 lines of classifier, planner, adversarial pipeline and primer built for a weaker model. I deleted them; routing belongs in the orchestrator above.
+- A knowledge base in context made the model anchor on the docs' framings. I turned it off and kept a 1 KB file of operator notes: facts help, framings hurt.
+- Citations drifted by a few lines. Making the read tool return absolute line numbers took exact citations from 88.7% to 99.3%.
+- Pre-pass outputs were re-billed on every loop iteration, so I converted them to on-demand tools.
+- Mixing cheap investigation with an expensive final call busted the prompt cache (0 hits in 5 runs). I abandoned it for uniform low effort.
+- A separate verify pass detected errors but didn't fix the report, so it was deleted as not worth its cost.
+
+## Evaluation design
+- A dataset of real tickets with no answer leakage: evidence folders hold raw files only, and the answers sit outside the agent's reach.
+- Questions in the reporter's own words.
+- A 0 to 5 score for finding the base problem, with a hard gate on fabrication.
+- Ground truth written by agents was itself re-verified.
+
+## Results
+- Log-collection tickets: 4.29/5, at about $0.32 and 56 seconds per question.
+- Signaling tickets: about 3.0/5. Fabrication was the main failure.
+- Graded against the actual merged code fix: about 2.4/5.
+
+The next lever is evidence discipline: forcing reads of counter and summary files, preferring customer captures over QA captures, and reading raw packet bytes instead of trusting summaries. I also extracted the agent into a standard-library-only Go module behind one runner interface, so it can move to a new architecture.

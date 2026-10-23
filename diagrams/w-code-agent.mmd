@@ -1,0 +1,13 @@
+flowchart TB
+  U[Original user question]
+  subgraph EXS["Executor: sees only the dump"]
+    D[(Logs, pcaps, configs)] --> EX{{Executor}}
+  end
+  subgraph CS["Code agent: sees only the code"]
+    CM[["Code map"]] --> CA{{"Code agent<br/>fresh history"}}
+    CA --> CT["find / list / grep / read"]
+  end
+  EX -->|"A: task as facts, not theory"| CA
+  U -->|"B: forwarded verbatim"| CA
+  CA -.->|"findings + file:line"| EX
+  EX --> R[Report]

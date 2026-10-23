@@ -1,0 +1,14 @@
+flowchart TB
+  subgraph r1[" "]
+    direction LR
+    D[DOCX manual] --> X["Parse XML<br/>headings + images"]
+    X --> I{"Image hash<br/>in cache?"}
+    I -->|no| G["Gemini describes<br/>the image"] --> CA[(Description cache)]
+  end
+  subgraph r2[" "]
+    direction LR
+    M["Markdown with<br/>descriptions inline"] --> K["Chunker<br/>breadcrumb prefix"] --> J[JSON chunks]
+  end
+  r1 --> r2
+  style r1 fill:none,stroke:none
+  style r2 fill:none,stroke:none

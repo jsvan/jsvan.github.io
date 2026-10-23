@@ -1,0 +1,13 @@
+QA testing turned up a set of failures. Each fix went into the most general layer that would hold.
+
+## Findings and fixes
+- The assistant criticized competitors. Fix: a positioning block that deflects to sales.
+- It made up configuration steps for a feature that doesn't exist. Fix: a general premise-verification rule, deliberately written without the specific example.
+- Follow-up suggestions went off-topic after a correct refusal. Fix: a scope rule in the follow-up generator.
+- Follow-up generation was too expensive. Fix: a smaller model from the same family.
+
+## Declined
+QA suggested moving session-level training into the permanent prompt. I declined: access control is enforced at the system level instead, outside the model.
+
+## Outcome
+Merged.

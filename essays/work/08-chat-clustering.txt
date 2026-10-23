@@ -1,0 +1,9 @@
+What do real users actually ask?
+
+## Design
+- Parse database dumps for each environment and strip out injected alert messages.
+- Deduplicate messages, and key the embedding cache on the message text.
+- Gemini embeddings, reduced with UMAP to 10 dimensions, clustered with HDBSCAN, and labelled with TF-IDF.
+
+## Result
+60 topic clusters, including several non-English ones. The clusters fed the fine-tuning data and the test corpus.

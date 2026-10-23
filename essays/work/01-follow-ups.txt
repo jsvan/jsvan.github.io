@@ -1,0 +1,15 @@
+The assistant had no product persona, and it couldn't suggest what to ask next.
+
+## Options I weighed
+- Recommendations inside the answer, marked by a delimiter. This needed fragile parsing of the stream.
+- A JSON-mode answer. This broke token streaming.
+- A separate endpoint. It costs one more call, but keeps the main stream clean.
+
+## What I built
+- A follow-up endpoint that runs its own retrieval, returns JSON, and falls back to default questions if parsing fails.
+- The product's first system prompt, and a model upgrade.
+- Input truncated by runes, not bytes, so multibyte text such as Chinese or Japanese is never cut mid-character.
+- Tool descriptions that document their output shape, and a prompt rule against showing internal IDs to users.
+
+## Outcome
+Merged.

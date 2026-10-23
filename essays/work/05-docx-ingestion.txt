@@ -1,0 +1,19 @@
+Turn product manuals into good retrieval chunks, with every figure described in words.
+
+## Options I weighed
+- PDF needs layout guessing; DOCX has real heading styles. I switched to DOCX.
+- Hashing PDF pages was nondeterministic, so I hash the images instead.
+
+## Decisions
+- Cache image descriptions by hash, so the expensive vision call runs once per unique image.
+- Fail loudly: no partial documents.
+- One file per pipeline step.
+
+## Final design
+- DOCX to Markdown, with each image replaced by a Gemini 2.5 Flash description that uses the surrounding text and alt text as context.
+- Each chunk gets its heading breadcrumb prepended before embedding.
+- Chunks of at most 800 tokens, at least 150, with a 200-token overlap.
+- 424 cached image descriptions, 340 chunks.
+
+## Outcome
+Shipped as its own Go repository.

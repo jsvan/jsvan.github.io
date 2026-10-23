@@ -1,0 +1,6 @@
+flowchart LR
+  Q[QA finding] --> L{Which layer?}
+  L -->|prompt| P["General rule<br/>no test-specific examples"]
+  L -->|generator| G["Scope rule for<br/>follow-up suggestions"]
+  L -->|model| M["Smaller model<br/>for follow-ups"]
+  L -->|system| S["Access control<br/>outside the model"]

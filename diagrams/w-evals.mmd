@@ -1,0 +1,6 @@
+flowchart TD
+  Q["Question sets<br/>real tickets / generated / original"] --> G["1 Generate<br/>call live assistant"]
+  G --> J["2 Judge<br/>0-3 fact rubric / refusals / alert sections"]
+  J --> V[3 Plots + summary]
+  J --> R["4 LLM review of<br/>Poor + Partial answers"]
+  G -.->|sub-agent suites| C[Collect only, hand-graded]

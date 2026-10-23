@@ -1,0 +1,5 @@
+flowchart TD
+  Q[User question] --> R["Hybrid retrieval<br/>BM25 + nomic embeddings, top 10"]
+  KB[("Q&A-per-heading KB<br/>from rule-based PDF cleaner")] --> R
+  R --> RR["MiniLM cross-encoder<br/>best 5, threshold 0.55"]
+  RR --> M["LFM-2.5-1.2B on Jetson<br/>short prompt, temp 0, no history"] --> A["Answer ~15 s"]

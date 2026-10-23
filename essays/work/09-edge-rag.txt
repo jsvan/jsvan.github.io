@@ -1,0 +1,18 @@
+Run the assistant entirely on-device, on a Jetson Orin Nano, with 0.5 to 1.2B-parameter models.
+
+## Tradeoffs
+- Embedding-only retrieval vs a BM25 hybrid: the embeddings were too heavy, so I went hybrid.
+- bge reranker vs a MiniLM cross-encoder: bge pushed responses to about a minute; MiniLM costs about 8 seconds.
+- Query rewriting and chat history both hurt reliability, so both are off.
+- Removing the refusal line fixed one false refusal but caused fabrication, so the line stayed.
+- A RAPTOR-style summary tree was too much work for the gain; simpler first-sentence summaries won.
+- A LoRA fine-tune of Qwen 0.5B on 1,946 examples seeded from real questions was replaced by an off-the-shelf model.
+- Speech-to-speech with PersonaPlex-7B needed about 20 GB of GPU memory, so I built a small speech-to-text, LLM, text-to-speech cascade instead. It stayed a proof of concept.
+
+## Final design
+- LFM-2.5-1.2B, BM25 hybrid retrieval, and a MiniLM reranker with a 0.55 threshold.
+- A knowledge base written as one question-and-answer pair per heading, produced by a rule-based PDF to Markdown cleaner.
+- A short prompt at temperature 0.
+
+## Result
+17 of 19 test questions correct, at about 15 seconds per answer. The cleaner shipped as its own repository.

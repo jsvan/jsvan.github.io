@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Build-time only: tools/render-diagrams.mjs drives this page. The site never loads Mermaid. -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: "strict",
+    theme: "base",
+    // System fonts only: an SVG shown via <img> can't load web fonts,
+    // so measure text with the same fonts it will be displayed in.
+    fontFamily: "Helvetica, Arial, sans-serif",
+    flowchart: { htmlLabels: false, curve: "basis" },
+    themeVariables: {
+      primaryColor: "#f4f1ec",
+      primaryBorderColor: "#8a8273",
+      primaryTextColor: "#1a1a1a",
+      secondaryColor: "#e8e4de",
+      tertiaryColor: "#f4f1ec",
+      lineColor: "#8a8273",
+      clusterBkg: "#e2dcd2",
+      clusterBorder: "#d4cfc6",
+      edgeLabelBackground: "#ebe6dd",
+      fontSize: "15px",
+    },
+  });
+  let n = 0;
+  window.renderDiagram = async (code) => (await mermaid.render(`d${n++}`, code)).svg;
+</script>

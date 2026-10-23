@@ -1,0 +1,8 @@
+flowchart TD
+  Q["User question + diagnostic dump"] --> INV[File inventory]
+  NOTES[["Operator notes, 1 KB"]] --> EX
+  INV --> EX{{"Executor loop<br/>reasoning model, max 30 steps"}}
+  EX <--> T1["list / read / grep<br/>log dedup"]
+  EX <--> T2["pcap summary / packet<br/>via tshark"]
+  EX <--> CI[["code sub-agent"]]
+  EX --> OUT["JSON report: evidence, ruled out,<br/>root cause, file:line citations"]

@@ -1,0 +1,7 @@
+flowchart TD
+  ING["Offline ingest: pipeline chunks<br/>embedded with Gemini"] --> QD[(Qdrant knowledge base)]
+  U[User question] --> PRE["Pre-search Qdrant<br/>results injected for this request only"]
+  QD --> PRE
+  PRE --> L{{Agent loop}}
+  L <-->|further searches| DT["documents tool<br/>Qdrant HTTP client"] <--> QD
+  L --> A["Answer<br/>pre-injected results never stored in history"]

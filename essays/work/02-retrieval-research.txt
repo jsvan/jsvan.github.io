@@ -1,0 +1,20 @@
+Three questions: should we leave the hosted vector store, which document parsers work for our manuals, and can a similarity score decide when to call a tool?
+
+## What I measured
+- Hosted store vs Qdrant, English (206 questions): a tie, 0.561 vs 0.559 similarity to the ground-truth answer.
+- Hosted store vs Qdrant, Chinese (122 questions): Qdrant better, 0.526 vs 0.489, winning 78 to 44.
+- End-to-end answer quality with an LLM judge: hosted file search 4.20/5, no retrieval 0.78, Qdrant variants about 3.8 to 3.9.
+- A similarity threshold to route between documents and tools doesn't work: the score ranges overlap from 0.37 to 0.70.
+- Parsers: Zerox took 33 minutes for 2 documents, Docling's local vision model gave degenerate descriptions, and a PyMuPDF hybrid still sent 70 to 90% of pages to vision.
+
+## Decisions
+- Score chunks against the embedded ground-truth answer instead of trusting the vendor's similarity score.
+- Blind judging, and no fake scores: a judgment that can't be made fails instead of guessing.
+- Tool calls stay optional.
+
+## Known biases
+- Qdrant's latency advantage was helped by embedding-cache hits.
+- Qdrant used naive 800/400-character chunks, so the comparison wasn't fully fair.
+
+## Outcome
+Production stayed on the hosted store. The parser findings fed the ingestion pipeline.

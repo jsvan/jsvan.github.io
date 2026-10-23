@@ -1,0 +1,8 @@
+Kreslit: LLM pipeline to convert essays into voiced, point and click explorable scene plays.
+News bias analyzer: Compare and cluster news companies by their sentiment emissions 
+U Lisu: Offline converter of photos of book pages to flashcards
+Smart Apartment: Dystopian Voice Controlled Apartment Simulation
+Grimmsly: Write Family Stories by Connecting to Local Writers
+TGM Propaganda Unit: Holistically Tune an LLM to Deeply Hold Values
+Word Associations: Compare implicit morality axis of words from different news outlets
+

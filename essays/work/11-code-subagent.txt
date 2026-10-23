@@ -1,0 +1,19 @@
+With logs alone, the agent found the right component but not the mechanism. Putting the source code into the dump folder didn't help, because the tools and prompt treated code files as logs.
+
+## Options I weighed
+- A vector database over the code. It solves localization, which wasn't our problem.
+- A call-graph index. Call graphs are unreliable for C++ virtual dispatch.
+- A sub-agent. I chose it, because code exploration is too context-heavy to share a history with evidence gathering.
+
+## Problems and fixes
+- The executor never delegated. Fix: a plain instruction to always use the code agent after diagnosing.
+- The executor passed its wrong theory along, and the sub-agent confirmed it. Fix: the tool description says "state facts, not your hypothesis", and the user's neutral question is forwarded verbatim.
+- It accepted causes that couldn't explain the symptom's numbers. Fix: a falsification rule. If a cause can't reproduce the exact value, it is ruled out.
+- It was slow to get oriented in an unfamiliar repo. Fix: a code-map orientation file, injected only into the sub-agent's prompt.
+- Prompt hints that leaked the test case were rejected; prompts stay generic.
+
+## Final design
+The logs agent sees only the logs and the code tool. The code agent sees only the code, on a fresh history, with find, list, grep and read tools. It is gated by environment variables and also runs as a standalone CLI.
+
+## Results
+One ticket went from about 3 to about 4 out of 5 and matched the real fix. Another went from about 2 to about 3, but the agent never opened the right file. Test code is checked out at the pre-fix commit.

@@ -1,0 +1,17 @@
+# TGM Propaganda Unit
+
+Czech liberal-humanist fine-tuning dataset for open-source LLMs.
+
+A curated corpus of Czech liberal-humanist philosophical thought (19th–20th century through modern day) for fine-tuning a model that responds to modern situations through the lens of Masaryk, Havel, Patočka, and their intellectual descendants.
+
+## Two-Stage Fine-Tuning
+
+**Stage 1 — Continued Pretraining**: Raw corpus texts teach the model the ideas, arguments, and moral frameworks.
+
+**Stage 2 — Instruction Tuning**: Synthetic modern Q&A pairs (generated via Claude API) teach the model to apply those philosophical principles in contemporary language.
+
+## Authors in Corpus
+
+Czech tradition: Masaryk, Havel, Patočka, Čapek, Rádl, Peroutka, Havlíček, Palacký, Hejdánek, Bělohradský
+
+Allied thinkers: Snyder, Judt, Applebaum

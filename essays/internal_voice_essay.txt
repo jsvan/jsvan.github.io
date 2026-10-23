@@ -1,0 +1,13 @@
+# Internal Voice
+
+**Hear yourself the way *you* do.**
+
+A recording captures only the sound that leaves your mouth. When you speak, you also hear your voice through bone conduction — vibrations traveling through your skull directly to the inner ear. That's why recordings sound thin and unfamiliar ("voice confrontation").
+
+This is a single-page web tool that adds the missing bone-conducted half back: record or upload a clip, tune two sliders until the playback matches the voice in your head, A/B against the original, and download the result as a WAV. Recordings can optionally use the browser's noise suppression, and any loaded clip has a dependency-free spectral noise-reduction slider (the gate learns the room's noise from the quietest moments of the clip).
+
+Everything runs client-side with the Web Audio API. No audio is ever uploaded.
+
+## The model
+
+Based on Won & Slaney (2014), *Simulation of One's Own Voice in a Two-parameter Model* (ICMPC): individual differences in the self-voice transfer function collapse onto two parameters — a low-frequency emphasis below a ~864 Hz pivot (α, the **Fullness** slider) and a high-frequency tilt (β, the **Brightness** slider) — layered on a fixed low-mid resonance consistent with Pörschmann's finding that bone conduction dominates roughly 700–1200 Hz. Full citations are on the page itself.

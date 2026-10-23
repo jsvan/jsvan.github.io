@@ -1,0 +1,13 @@
+flowchart TB
+  subgraph r1[" "]
+    direction LR
+    U[User message] --> SP["System prompt<br/>sensitive content removed"] --> CF["Confidentiality block"] --> IA["Internal-architecture block"]
+  end
+  subgraph r2[" "]
+    direction LR
+    CO["Carve-outs: documented<br/>product configuration"] --> M{{Model}} --> A[Answer]
+    M -.->|"optional, not built"| OF["Output filter: stop stream<br/>if it echoes the prompt"]
+  end
+  r1 --> r2
+  style r1 fill:none,stroke:none
+  style r2 fill:none,stroke:none

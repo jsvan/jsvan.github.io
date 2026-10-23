@@ -1,0 +1,6 @@
+flowchart TD
+  Q["Question sets<br/>206 English, 122 Chinese"] --> H[Hosted vector store]
+  Q --> S[Self-hosted Qdrant]
+  H --> J["Score chunks against the<br/>embedded ground-truth answer"]
+  S --> J
+  J --> D["Decision: stay hosted,<br/>tool calls stay optional"]

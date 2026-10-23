@@ -1,0 +1,57 @@
+ # Grimmsly - Family Storytelling Platform
+
+Connect families with talented storytellers to preserve memories in beautiful books, podcasts, and more.
+
+## Features
+
+### For Families (Customers)
+- **Find Local Storytellers**: Search for writers, illustrators, and other creatives in your area
+- **Cultural Matching**: Connect with storytellers who understand your background and heritage
+- **Transparent Pricing**: Set your budget and see artist rates upfront
+- **Secure Messaging**: All communication happens through the platform
+- **Cloud Storage**: Store interviews, photos, and documents securely
+- **Multiple Formats**: Create biographies, children's books, podcasts, documentaries, and more
+
+### For Storytellers (Artists)
+- **Vetted Community**: Join a professional network of verified storytellers
+- **Set Your Rates**: Full control over pricing and project minimums
+- **Custom Templates**: Create project templates for common story types
+- **Instagram-Style Portfolio**: Dual system with public slideshow in About section and private Portfolio tab for management
+- **Mixed Media**: Upload photos and embed YouTube videos with 16:9 aspect ratio display
+- **Multi-Media Support**: Batch image uploads with automatic optimization and thumbnail generation
+- **Portfolio Privacy**: Public viewing for all visitors, private management interface for artist only
+- **Local & Remote**: Choose to work locally or with clients anywhere
+
+### Platform Features
+- **Geographic Search**: Find storytellers by location with distance calculations
+- **Smart Matching**: Algorithm matches based on culture, language, and specialization
+- **Review System**: Build trust through verified reviews
+- **Milestone Payments**: Secure payment system with project milestones
+- **Recurring Payments**: Subscription-based support for ongoing projects
+- **Story Wall**: Share completed projects and inspire others
+- **Community Forum**: Discussion posts with voting and comments
+
+### Administrative Features
+- **Complete User Management**: Full lifecycle management from application to deletion
+- **Artist Application Review**: Approve, reject, or delete artist applications
+- **Comprehensive Data Cleanup**: Cascade deletion with automatic file cleanup from blob storage
+- **Project Oversight**: View, manage, and delete projects with all associated data
+- **Community Moderation**: Manage forum and wall posts with full content oversight
+- **Real-time Analytics**: Platform statistics and user engagement metrics
+- **Safety Controls**: Confirmation dialogs for all destructive actions
+- **Audit Trail**: Maintain records of rejected applications for business intelligence
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js with CSRF protection
+- **File Storage**: Vercel Blob Storage
+- **Image Processing**: Sharp.js for optimization and thumbnails
+- **Video Integration**: YouTube Data API v3
+- **Payments**: Stripe Connect
+- **Location Services**: Google Maps API
+- **Validation**: Zod for runtime type safety
+- **State Management**: Custom React hooks
+- **Messaging**: On-demand fetching (webhook-ready architecture)

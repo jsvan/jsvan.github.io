@@ -1,0 +1,21 @@
+We needed a regression gate for document answers, refusals, and alert formatting.
+
+## How it evolved
+- A Go harness with a 1 to 4 LLM judge. Its flaw: a judge error counted as a "Poor" answer.
+- A Python four-stage pipeline: generate, judge, plot, then an LLM summary of the failures.
+- Separate suites for each sub-agent.
+
+## My fixes
+- The rubric became 0 to 3 by the fraction of ground-truth facts found, with a hallucination penalty, and with judge errors kept separate from bad answers.
+- Tests delete their threads after each run instead of using a special test message type.
+- No state file; runs resume from the output folders.
+- Alerts are graded on structure: three sections and a reasonable length.
+- Questions from real tickets are kept apart from generated ones.
+- Collect-only scripts with hand grading, because the auto-grades disagreed with mine.
+
+## Results
+88.8% and 82.5% Good on two suites (n=80), and alerts 10/10. After the move to a multi-agent architecture, alerts fell to 3/5, which led to the deterministic routing work.
+
+## Remaining flaws
+- An unparseable judge reply scores Partial instead of N/A.
+- A loose refusal phrase can count a non-answer as a correct refusal.

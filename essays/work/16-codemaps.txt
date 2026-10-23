@@ -1,0 +1,14 @@
+With more than 100 repositories, an agent can't tell which repo or which files to look at.
+
+## Decisions
+- Expanded from the 15 biggest repositories to all 113.
+- Each parallel agent clones a repo, writes the map, then deletes the clone, to save disk.
+- A generic prompt so that any map can be regenerated.
+
+## Final design
+- An index that routes 90 active repositories by domain, plus 23 archived stubs.
+- One map per repository, stamped with the commit it was written from.
+- The maps caught traps a newcomer would fall into, such as one acronym meaning two different components in two different repositories.
+
+## Result
+113 agents, 0 failures, about 29 minutes.

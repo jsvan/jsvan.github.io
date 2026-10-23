@@ -1,0 +1,21 @@
+The team replaced the old agent loop with a runner, YAML-declared agents, and a fleet compiled once at startup. My agents had to move onto it.
+
+## The rule I set
+The core assistant is rigid; my sub-agents are malleable. Upstream gets only additive hooks, and upstream bugs are written up, not fixed in my branch.
+
+## Tradeoffs
+- The root-cause tools are bound to a dump path for each request, but the fleet is static. So that path dispatches before the orchestrator, on a per-request registry.
+- Should the code agent sit parallel to the others or be a child of the root-cause agent? A router in front adds a turn and a misroute risk; parallel fan-out doubles the cost. I kept it as a child, with message-type routing at the API.
+
+## Final design
+- The executor and code agent are declared in the shared YAML schema and compiled per request with placeholder substitution.
+- The code agent is a native handoff, replacing about 120 lines of custom glue.
+- Prompts were verified byte-identical before and after the change.
+- A REPL for interactive runs.
+- Code-agent findings are saved to chat history, and only the request handler writes history.
+
+## Found in live testing
+The model call had no timeout, and one request hung for 2 hours. Fixed with a 300-second default.
+
+## Result
+Behavior was equivalent across the port: the same hits and misses, at about $0.60 per question.

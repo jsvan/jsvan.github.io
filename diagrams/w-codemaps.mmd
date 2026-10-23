@@ -1,0 +1,13 @@
+flowchart TB
+  subgraph r1[" "]
+    direction LR
+    L[113 repositories] --> W{{"Parallel agents<br/>~16 at a time"}} --> C1["Shallow clone"]
+  end
+  subgraph r2[" "]
+    direction LR
+    M1["Write map:<br/>purpose, layout, key flows"] --> X1[Delete clone]
+    M1 --> MAPS[("One map per repo<br/>stamped with commit")] --> IDX["Index<br/>routing by domain"]
+  end
+  r1 --> r2
+  style r1 fill:none,stroke:none
+  style r2 fill:none,stroke:none
