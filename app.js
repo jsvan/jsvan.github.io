@@ -82,7 +82,8 @@
     const seq = ++renderSeq;
     const isDiagram = p.image.endsWith(".svg");
     const alt = p.alt || `${isDiagram ? "Diagram" : "Screenshot"} of ${p.title}`;
-    const visual = `<img class="featured-image${isDiagram ? " featured-diagram" : ""}" src="${esc(p.image)}" alt="${esc(alt)}">`;
+    const pos = p.imagePosition ? ` style="object-position: ${esc(p.imagePosition)}"` : "";
+    const visual = `<img class="featured-image${isDiagram ? " featured-diagram" : ""}" src="${esc(p.image)}" alt="${esc(alt)}"${pos}>`;
     featured.innerHTML = `
       ${link(p, visual, "featured-image-link")}
       <div class="featured-body">
