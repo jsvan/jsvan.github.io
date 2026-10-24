@@ -1,17 +1,43 @@
-# TGM Propaganda Unit
+Why I built this
+Online political discussion is mostly parroting. Somebody takes a side, repeats the side's lines, and the other side repeats theirs. I wanted to see whether a language model could be raised on a different diet, the Czech liberal-humanist tradition of Masaryk (TGM), Havel, Patočka, Čapek, Havlíček and Palacký, and then react to today's news with angles that don't fit the usual left/right template. Nobody in modern politics wants a philosophy lesson. But a mind formed by "living in truth," "small-scale work," anti-hubris and the "solidarity of the shaken" should notice things in a news story that a partisan wouldn't. The name is a joke: propaganda for thinking for yourself.
 
-Czech liberal-humanist fine-tuning dataset for open-source LLMs.
+The goal isn't a chatbot that quotes Masaryk. It's a model that takes on the personality of these thinkers and then forms and defends its own judgments about events they never lived to see.
 
-A curated corpus of Czech liberal-humanist philosophical thought (19th–20th century through modern day) for fine-tuning a model that responds to modern situations through the lens of Masaryk, Havel, Patočka, and their intellectual descendants.
+The corpus
+The tradition was a panel of voices before it became one body of thought, so the corpus started as a panel: one folder per author, with Czech originals wherever I could get them and English translations where I couldn't (most of the Patočka I have is English). Then I went looking for more.
 
-## Two-Stage Fine-Tuning
+The Czech National Corpus links to a handful of datasets on LINDAT. Six of the seven I checked were dead ends: modern newspaper text, licensed for academic use only, and deliberately shuffled into blocks of 100 words or less so that nobody can reconstruct the original books. That makes them useless for teaching a model to follow an argument. The seventh was Diakorp, a diachronic corpus of 116 Czech texts from the 14th century to the 20th, under an open license. It arrived as a 28 MB file with no extension: one word per line, with modern and original spellings in separate columns and editorial tags mixed in. I wrote a converter to stitch it back into readable prose.
 
-**Stage 1 — Continued Pretraining**: Raw corpus texts teach the model the ideas, arguments, and moral frameworks.
+Diakorp held exactly one of my authors (Masaryk's Naše nynější krise, which I didn't have yet). The other promising hits were false positives: the "Havel" was Havel Žalanský, a preacher from 1615, and the "Čapek" was Čapek-Chod, a different writer. The rest is a survey of six centuries of Czech: Komenský, Mácha, Jirásek, medieval prayer books, a dream-book, a Jesuit account of converting Japan, and manuals on beekeeping and horse medicine. Taking all of it would have made Diakorp 69% of the training text, and I didn't want the model to become a medieval monk. Monks are fine, as long as they aren't steering. I kept everything from 1800 on, which is the National Revival milieu my authors came out of, and a dozen older texts for texture. That leaves the old material at about 12% of the corpus.
 
-**Stage 2 — Instruction Tuning**: Synthetic modern Q&A pairs (generated via Claude API) teach the model to apply those philosophical principles in contemporary language.
+Lately I've been adding Plato and Aristotle (the Republic, Gorgias, Symposium, the Socrates dialogues and the Nicomachean Ethics). They aren't there as more voices. They're there for method: Socrates is the original example of an idea being tested until it breaks or holds.
 
-## Authors in Corpus
+All together the corpus is roughly 14 million tokens, and about 89% of it is Czech.
 
-Czech tradition: Masaryk, Havel, Patočka, Čapek, Rádl, Peroutka, Havlíček, Palacký, Hejdánek, Bělohradský
+Czech in, English out
+At one point I was convinced everything had to be translated into English first. A translation run is very doable (hours, and tens of dollars), but it destroys what makes the material worth having. A translation keeps the content and throws away the voice and the rhythm of the originals, and you end up teaching the model translationese. What I actually want is cross-lingual: the model reads in Czech and speaks in English. Multilingual models share a lot of their internal representation across languages, but knowledge tends to stay stuck in the language it was learned in. So the bridge has to be built on purpose, with training examples where the model reads a Czech passage and reasons about it in English.
 
-Allied thinkers: Snyder, Judt, Applebaum
+The first pipeline
+The first version was a standard two-stage recipe. Stage one is continued pretraining on raw text, so the model absorbs the ideas. Stage two is instruction tuning on synthetic dialogues, so it learns to use those ideas in conversation. I hand-wrote a taxonomy of 25 principles across the authors, each with its tensions and links to other thinkers, and used it to seed 750 dialogues. Five Claude Code subagents generated them in parallel over 75 batches without a single failure. A small proof-of-concept model built on Qwen3-4B is up on Ollama.
+
+The bigger dataset has never been trained on. The more I looked at it, the less I thought it was the right thing to train.
+
+Reading is not absorbing
+Next-word prediction is imitation. Train on Masaryk and you get something that sounds like Masaryk, with no stance of its own. Most of the literature on getting more out of a small corpus doesn't help much here. It reformats the corpus into question-and-answer pairs or comprehension tasks, which builds recall but not judgment. The closest work I found is EntiGraph and Synthesize-on-Graph, which generate text describing how the concepts in a corpus relate to each other, and Reasoning CPT, which reconstructs the author's hidden reasoning behind a passage and trains on that. Even those were tested on factual recall, not on taking a position.
+
+So I keep coming back to how people actually learn. We read, we try to remember it, and then we have an internal argument about what it means, whether it's right, and where it leads. Then that argument becomes part of how we think. That process is what I'm trying to imitate. Concretely:
+
+- Read a passage and generate the internal debate: what is it saying, what do I agree or disagree with, how well is it argued, how does it connect to the other thinkers.
+- Put the material up against itself. Masaryk's idealism against Havlíček's realism, Čapek's ordinary decency against Patočka's demand for sacrifice, Plato cross-examining all of them.
+- Keep the thoughts that survive and train on those.
+- Later, sample pairs of a historical text and a current news story, and train on the bridge between them. At inference time it only gets the news story.
+
+That last step is a known technique called context distillation. You train with the scaffolding (the source text plus the reasoning) and deploy without it, so the model has to pull the relevant history from its own weights. It also gets rid of the lecture: the debate happens during training, and what comes out at the end is only the conclusion.
+
+The hard part
+Arguing only helps if something decides who won. Without a victory condition the model learns to perform an argument rather than judge one, and it produces fluent "on the one hand, on the other" prose with nothing actually weighed underneath. My working criterion has two halves: an idea is better if it survives questioning (Plato's test) and if it serves people over ideology (the common thread in Masaryk, Havel and Patočka). The uncomfortable part is that the debates are refereed by whichever model generates them, so the student can only get as good as the judge. And no paper I've found knows how to check whether a philosophical reading is correct, the way you can check a math answer.
+
+The other open question is scale. An 8B model's Czech is weak, and everything here depends on it actually understanding the source. With QLoRA, a model around 32B can still be trained on a single rented GPU, and it can still run locally from Ollama.
+
+Where it stands
+The data side is in good shape. The training method is a design that nobody (including me) has validated, and that's the part I'm working on now. Next is a small pilot: generate debates on a slice of the corpus, judge them, and read the output to see whether they come out deep or shallow before I scale anything. The test I care about in the end is simple. If a reader can't tell its take on the news apart from a partisan tweet, it failed.

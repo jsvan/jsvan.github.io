@@ -1,11 +1,11 @@
-Kreslit: LLM pipeline to convert essays into voiced, point and click explorable scene plays.
+Kreslit: Automated LLM pipeline to convert dense essays into voiced, point and click explorable scene plays.
 News bias analyzer: Compare and cluster news companies by their sentiment emissions 
 U Lisu: Offline converter of photos of book pages to flashcards
-Smart Apartment: Dystopian Voice Controlled Apartment Simulation
-Grimmsly: Write Family Stories by Connecting to Local Writers
-TGM Propaganda Unit: Holistically Tune an LLM to Deeply Hold Values
+Smart Apartment: Dystopian voice controlled apartment simulation
+Grimmsly: Write family stories by connecting to local writers
+TGM Propaganda Unit: Holistically tune an LLM to deeply hold values
 Word Associations: Compare implicit morality axis of words from different news outlets
 
-Friend Swipe: Meet AI Prague locals in Czech, by swiping a deck or walking a 2D city
+Friend Swipe: Language learning AI guided simulation, where you do real world based interaction quests with simulated citizens 
 -Glish: Foreign vocab learner inside the webpages you already read
-Bus Stop Bloom Filter: Public transportation signage based on bloom filters
+Bus Stop Bloom Filter: How can bloom filters change public transportation signage?

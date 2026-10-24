@@ -1,5 +1,7 @@
  # Grimmsly - Family Storytelling Platform
 
+My father died and my mother wanted to write his life story into a book for us. She is not a writer, so she found an English Lit. PhD to meet with her, work with her writing, edit, guide, ask questions, and steer her through this process that is full of taste and removing/rising above yourself from your subjective perspective. She loved this experience. The experience was therapeutic, and the expertise of her tutor led her to intellectual areas she never would have arrived to on her own. I wanted to make a business out of this, so this is the website to handle that. I never put in the effort to get it off the ground. Perhaps one day.  
+
 Connect families with talented storytellers to preserve memories in beautiful books, podcasts, and more.
 
 ## Features
