@@ -8,4 +8,3 @@ Word Associations: Compare implicit morality axis of words from different news o
 
 Friend Swipe: Meet AI Prague locals in Czech, by swiping a deck or walking a 2D city
 -Glish: Foreign vocab learner inside the webpages you already read
-Chemnitz Concertina: Interactive push/pull button chart with scales and chords

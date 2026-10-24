@@ -98,14 +98,6 @@ window.FOLDERS = [
         essay: "essays/glish_essay.txt",
         url: "https://github.com/jsvan/-glish",
       },
-      {
-        id: "concertina",
-        title: "Chemnitz Concertina",
-        tagline: "Interactive push/pull button chart with scales and chords",
-        image: "images/concertina.jpg",
-        essay: "essays/concertina_essay.txt",
-        url: "https://jsvan.github.io/Chemnitz_Concertina/",
-      },
     ],
   },
   {
