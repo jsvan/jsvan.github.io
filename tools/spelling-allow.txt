@@ -51,3 +51,7 @@ ojibwe
 stackoverflow
 staroměstské
 grimmsly
+hackaday
+stendal
+hbf
+colour

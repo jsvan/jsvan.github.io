@@ -1,0 +1,28 @@
+A cute idea I had that made the front page of Hacker News (https://news.ycombinator.com/item?id=35248912), has 71 stars on GitHub, and was featured on Hackaday (https://hackaday.com/2023/03/27/bus-stop-bloom-filter/).
+
+Navigating arbitrarily complex bus systems can be tricky, especially as bus listings and routes are listed in O(N) style wall-posters. Can we use bloom filters to make routing decisions O(1) for the passenger?
+
+Here is a short look on two problems:
+1. how can we visualize a bit array?
+2. how few bits can we get away with to avoid *too many* false positives?
+
+My technique can visualize 192 bits, and achieve a < 0.5% false positive rate on my Deutsche Bahn system simulation.
+
+Following is a video presentation of this idea which is the same information that is here just in video format, honestly you shouldn't even watch it unless you really like sitting through presentations: https://www.youtube.com/watch?v=rGu2NkZPEzo
+
+Population will expand and public transportation will become more complex. How can we rethink how we do public transportation signage to keep finding your bus (and/or your bus stop) independent of how many buses are arriving or how complex their routes are?
+
+How it works
+You will need to know the "fingerprint" of your destination. The fingerprint for Stendal Hbf is three bits of information: three symbols on a grid of lettered tiles.
+
+Every bus stop's destination placard will show the accumulated fingerprints of all the buses coming through. If all three of your symbols are present on the placard, there is at least one bus passing through this stop which will also go to your destination.
+
+Each bus or train coming in shows its own fingerprint. If your destination fingerprint does not match, you do not get on. If it matches, get on!
+
+Benefits are that:
+- scaling your bus system does not lead to more complicated fingerprints
+- riders must not read signage in a given language or alphabet
+- very quick to see where you need to be and which bus you should board
+
+Other visualizations
+Other visualization techniques I've thought of were using a 2d array of emojis. If we could get 15x15 emojis we would have 225 bits of info, we could subdivide that into nine 5x5 square tiles like a tic-tac-toe board, give each square a unique background colour, and tell people, if you have a crocodile in the upper left blue tiles and... etc. Emojis may look tacky, but they are distinct images, compact in size, free, prevalent, and people are already largely familiar with that particular set of pictures, so it would be more intuitive. With any system I can think of, high-res screens or printed pieces of paper would be required to display the level of detail symbols need.

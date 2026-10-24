@@ -1,8 +1,7 @@
 // Each entry: one row in the sidebar, one featured panel.
 // `essay` is a plain-text file in essays/ (blank lines = paragraphs,
 // short unpunctuated lines = headings, Markdown #/-/** also work).
-// `url` makes the image and title clickable. Images crop to 16:9 keeping the
-// top; `imageFit: "contain"` shows the whole image instead. Work diagrams are static SVGs
+// `url` makes the image and title clickable. Work diagrams are static SVGs
 // rendered from diagrams/*.mmd by tools/render-diagrams.mjs.
 // Landing panel, shown when no ?p= is given. "Home" heads the sidebar with
 // no rows under it; clicking it, a row's X, or anywhere off the panel returns here.
@@ -11,9 +10,8 @@ window.HOME = {
   id: "home",
   title: "Home",
   tagline: '"You hypocrites! You know how to interpret the appearance of the earth and the sky; why do you not know how to interpret the present time?"',
-  image: "images/julian-concert.jpg",
-  imageFit: "contain",
-  alt: "Photo of Julian Vanecek",
+  image: "images/github.jpg",
+  alt: "Julian Vanecek's GitHub profile",
   essay: "essays/personal_essay.txt",
   url: "https://github.com/jsvan",
 };
@@ -109,6 +107,14 @@ window.FOLDERS = [
         image: "images/internal-voice.jpg",
         essay: "essays/internal_voice_essay.txt",
         url: "https://jsvan.github.io/internal-voice/",
+      },
+      {
+        id: "bus-stop-bloom",
+        title: "Bus Stop Bloom Filter",
+        tagline: "Public transportation signage based on bloom filters",
+        image: "images/bus-stop-bloom.png",
+        essay: "essays/bus_stop_bloom_essay.txt",
+        url: "https://github.com/jsvan/BusStopBloomfilter",
       },
     ],
   },
