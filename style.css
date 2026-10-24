@@ -105,6 +105,12 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
   margin-bottom: 20px;
 }
 
+/* imageFit: "contain" shows the whole image, leaving the frame's sides empty */
+.featured-contain {
+  object-fit: contain;
+  background: transparent;
+}
+
 /* Work items: static SVG diagrams, shrunk to fit but never enlarged */
 .featured-diagram {
   object-fit: scale-down;
