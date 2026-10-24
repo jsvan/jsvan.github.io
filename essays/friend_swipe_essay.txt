@@ -1,0 +1,15 @@
+What is it like to be a stranger in Prague? The original idea was a Tinder for practicing a foreign language. Swipe through the people of the city as they are in 2026: the bitter babička, the tired young mother, the Harley punk, the art student, the Vietnamese-Czech shopkeeper, the street cleaner. Start a conversation and talk to them in Czech. Somewhere along the way it stopped being a language tutor and became a society simulator. Czech is just the medium because the city is Prague. The characters don't care whether you're learning. They react to what you say, and they stay in character whether you make sense to them or not.
+
+Every character is hand-written: a profile, an about me, hobbies, and then hidden traits that steer the conversation. One could be single and quietly interested in you. One could be racist. One could be too busy starting a business to give you the time of day. None of this is shown to the player. There are about 60 of them and 100 quests, all static JSON, no runtime generation.
+
+The swipe
+The first app is the linear one. A deck of cards, swipe left or right, open a chat. Each message you send is exactly one call to Claude Haiku, with the tool schema forced so the reply comes back structured: what they say, what they now remember about you, which way the relationship moved, and whether you just finished a quest. Each character tracks you on three hidden axes (friendship from antagonist to romantic, respect, and engagement). My first plan had the character granting achievements itself, and I wasn't sure Haiku could handle that. In the end the model only nudges, and the app does the deciding.
+
+On top of that sits a collection game. There are 19 achievement boxes that stay hidden until you put the first entry in one. Fill a box and a reward drops from a ladder of 100. Quests come from a gold button, never from chat on their own. Power-ups let you stamp a quest closed, discard one, or take back a swipe.
+
+The walk
+The same question has a second answer. A sister app takes the same characters and the same conversation engine and drops them into a Pokémon-style 2D world. The map is generated from OpenStreetMap, so Staroměstské náměstí is where it should be and the streets carry their real names. You walk around and bump into whoever happens to be standing on your tile. Then it grew. There is a metro to jump across the city, a radio, day and night with lit windows, beer that bends the camera into a non-euclidean wide-angle lens, NPCs who brawl each other to a knockdown, and police squads. Bogotá came second as a whole other city, in Spanish.
+
+Both apps copy their engine instead of sharing it. That was on purpose. Swiping is intimate and asynchronous, walking is spatial and accidental, and one codebase would have forced one metaphor. They are free to drift apart.
+
+Friends play on my API key behind a guest password, with a cap of about 50 cents each. After that a message tells them to send me 10 Kč to keep going.
