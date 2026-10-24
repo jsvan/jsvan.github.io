@@ -1,11 +1,30 @@
+Home: "You hypocrites! You know how to interpret the appearance of the earth and the sky; why do you not know how to interpret the present time?"
+
 Kreslit: Automated LLM pipeline to convert dense essays into voiced, point and click explorable scene plays.
-News bias analyzer: Compare and cluster news companies by their sentiment emissions 
+News bias analyzer: Compare and cluster news companies by their sentiment emissions
 U Lisu: Offline converter of photos of book pages to flashcards
 Smart Apartment: Dystopian voice controlled apartment simulation
 Grimmsly: Write family stories by connecting to local writers
 TGM Propaganda Unit: Holistically tune an LLM to deeply hold values
 Word Associations: Compare implicit morality axis of words from different news outlets
-
-Friend Swipe: Language learning AI guided simulation, where you do real world based interaction quests with simulated citizens 
+Friend Swipe: Language learning AI guided simulation, where you do real world based interaction quests with simulated citizens
 -Glish: Foreign vocab learner inside the webpages you already read
 Bus Stop Bloom Filter: How can bloom filters change public transportation signage?
+Internal Voice: Hear yourself the way others do, how you do
+
+Follow-up Questions: Parallel LLM call to produce follow up questions
+Retrieval Research: Comparing vector stores, parsers and thresholds for architecture design
+Alert Explanation: Dashboard alert LLM can diagnose the problem for you
+Evaluation Harness: A regression gate for answers, refusals and alerts
+DOCX Ingestion Pipeline: Chunking our company documentation with image descriptions
+Qdrant Prototype: Testing qdrant performance for RAG retrieval
+Gemini Robustness: Gemini invented tools, produces dead responses
+Chat-Log Clustering: What do real users actually ask? 
+Edge RAG on a Jetson: The RAG assistant on a 1.2B model, on airgapped device
+Root-Cause Agent: LLM finds and diagnoses root causes from 66 MB of noisy logs
+Code-Investigation Sub-agent: separate out code reading agent from log reading agent
+Multi-Agent Port: Moving onto a YAML-declared agent fleet
+Deterministic Alert Routing: Don't make a model rediscover what the UI knows
+QA Guardrails: Each fix in the most general layer that holds
+System-Prompt Disclosure Fix: Awkward prompt text removed and guardrail inserted to avoid prompt leak unpleasantries
+Org-Wide Codemaps: 113 repositories mapped to allow code-diagnostic agent to find the correct repos.

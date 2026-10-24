@@ -119,43 +119,63 @@
   let current = null;
   const goHome = () => { if (current !== HOME) select(HOME, true); };
 
-  const homeLabel = document.createElement("h2");
-  homeLabel.className = "sidebar-folder-name sidebar-home";
-  homeLabel.textContent = HOME.title;
-  rows.set(HOME.id, homeLabel);
-  sidebar.append(homeLabel);
+  // Taglines live in essays/descriptions.txt, one "Title: tagline" per line,
+  // matched to titles ignoring case.
+  fetch("essays/descriptions.txt")
+    .then((r) => (r.ok ? r.text() : ""))
+    .catch(() => "")
+    .then((text) => {
+      const taglines = new Map();
+      for (const line of text.split("\n")) {
+        const m = line.match(/^([^:]+):\s*(.*)$/);
+        if (m) taglines.set(m[1].trim().toLowerCase(), m[2].trim());
+      }
+      for (const p of [HOME, ...window.FOLDERS.flatMap((f) => f.items)]) {
+        p.tagline = taglines.get(p.title.toLowerCase()) || "";
+        if (!p.tagline) console.warn(`No line for "${p.title}" in essays/descriptions.txt`);
+      }
+      build();
+    });
 
-  const all = [];
-  for (const folder of window.FOLDERS) {
-    const label = document.createElement("h2");
-    label.className = "sidebar-folder-name";
-    label.textContent = folder.name;
-    const group = document.createElement("div");
-    group.className = "sidebar-folder-group";
-    for (const p of folder.items) {
-      all.push(p);
-      const row = document.createElement("button");
-      row.className = "sidebar-row";
-      row.innerHTML = `<h3 class="sidebar-row-title">${esc(p.title)}</h3><div class="sidebar-row-meta">${esc(p.tagline)}</div><span class="sidebar-row-close" aria-label="Close, back to Home" title="Back to Home">×</span>`;
-      row.addEventListener("click", (e) => {
-        if (e.target.closest(".sidebar-row-close")) goHome();
-        else select(p, true);
-      });
-      rows.set(p.id, row);
-      group.appendChild(row);
+  function build() {
+    const homeLabel = document.createElement("h2");
+    homeLabel.className = "sidebar-folder-name sidebar-home";
+    homeLabel.textContent = HOME.title;
+    rows.set(HOME.id, homeLabel);
+    sidebar.append(homeLabel);
+
+    const all = [];
+    for (const folder of window.FOLDERS) {
+      const label = document.createElement("h2");
+      label.className = "sidebar-folder-name";
+      label.textContent = folder.name;
+      const group = document.createElement("div");
+      group.className = "sidebar-folder-group";
+      for (const p of folder.items) {
+        all.push(p);
+        const row = document.createElement("button");
+        row.className = "sidebar-row";
+        row.innerHTML = `<h3 class="sidebar-row-title">${esc(p.title)}</h3><div class="sidebar-row-meta">${esc(p.tagline)}</div><span class="sidebar-row-close" aria-label="Close, back to Home" title="Back to Home">×</span>`;
+        row.addEventListener("click", (e) => {
+          if (e.target.closest(".sidebar-row-close")) goHome();
+          else select(p, true);
+        });
+        rows.set(p.id, row);
+        group.appendChild(row);
+      }
+      sidebar.append(label, group);
     }
-    sidebar.append(label, group);
+
+    const wanted = new URLSearchParams(location.search).get("p");
+    select(all.find((p) => p.id === wanted) || HOME, false);
+    // Warm the cache so switching projects feels instant.
+    [HOME, ...all].forEach(loadEssay);
+
+    // A click anywhere off the open project goes Home. Rows handle their own
+    // clicks (including the X), and links open in a new tab.
+    document.addEventListener("click", (e) => {
+      if (featured.contains(e.target) || e.target.closest(".sidebar-row, a")) return;
+      goHome();
+    });
   }
-
-  const wanted = new URLSearchParams(location.search).get("p");
-  select(all.find((p) => p.id === wanted) || HOME, false);
-  // Warm the cache so switching projects feels instant.
-  [HOME, ...all].forEach(loadEssay);
-
-  // A click anywhere off the open project goes Home. Rows handle their own
-  // clicks (including the X), and links open in a new tab.
-  document.addEventListener("click", (e) => {
-    if (featured.contains(e.target) || e.target.closest(".sidebar-row, a")) return;
-    goHome();
-  });
 })();
