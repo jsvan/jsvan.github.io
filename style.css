@@ -53,7 +53,7 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
   white-space: nowrap;
 }
 .landing-brand:hover { color: #555; }
-.topbar-links { margin-left: auto; display: flex; gap: 18px; }
+.topbar-links { margin-left: auto; display: flex; align-items: baseline; gap: 18px; }
 .topbar-link {
   font-size: 13px;
   font-weight: 500;
@@ -64,6 +64,54 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
   transition: color 0.2s;
 }
 .topbar-link:hover { color: #555; }
+
+/* Contact dropdown, anchored under the Contact link at the right edge */
+.contact { position: relative; }
+.contact-toggle { width: auto; cursor: pointer; }
+.contact-toggle[aria-expanded="true"] { color: #555; }
+.contact-menu {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 10;
+  background: var(--bg);
+  border: 1px solid #d4cfc6;
+  border-radius: 2px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  padding: 8px 0;
+  width: max-content; /* else it shrinks to the narrow Contact link */
+  max-width: calc(100vw - 32px);
+}
+.contact-menu[hidden] { display: none; }
+.contact-item {
+  display: grid;
+  grid-template-columns: 70px auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 16px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.contact-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.contact-label:hover { color: #1a1a1a; }
+.contact-item a { color: #1a1a1a; text-underline-offset: 2px; overflow: hidden; text-overflow: ellipsis; }
+.contact-copy {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: #999;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.contact-copy:hover { color: #1a1a1a; background: rgba(0, 0, 0, 0.06); }
 
 /* ---- Body: featured (left) + list (right) ---- */
 .landing-body {

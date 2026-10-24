@@ -174,10 +174,37 @@
     [HOME, ...all].forEach(loadEssay);
 
     // A click anywhere off the open project goes Home. Rows handle their own
-    // clicks (including the X), and links open in a new tab.
+    // clicks (including the X), links open in a new tab, and Contact has its own menu.
     document.addEventListener("click", (e) => {
-      if (featured.contains(e.target) || e.target.closest(".sidebar-row, a")) return;
+      if (featured.contains(e.target) || e.target.closest(".sidebar-row, a, .contact")) return;
       goHome();
     });
+  }
+
+  // Contact dropdown: toggles on its button, closes on Escape or a click outside.
+  const COPY_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  const contact = document.querySelector(".contact");
+  const toggle = contact.querySelector(".contact-toggle");
+  const menu = contact.querySelector(".contact-menu");
+  const setOpen = (open) => {
+    menu.hidden = !open;
+    toggle.setAttribute("aria-expanded", open);
+  };
+  toggle.addEventListener("click", () => setOpen(menu.hidden));
+  document.addEventListener("click", (e) => { if (!contact.contains(e.target)) setOpen(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+  // The icon and the label both copy; the icon flips to a check to confirm.
+  for (const item of contact.querySelectorAll(".contact-item")) {
+    const icon = item.querySelector(".contact-copy");
+    icon.innerHTML = COPY_ICON;
+    const copy = () => {
+      navigator.clipboard.writeText(icon.dataset.copy).then(() => {
+        icon.innerHTML = CHECK_ICON;
+        setTimeout(() => (icon.innerHTML = COPY_ICON), 1200);
+      });
+    };
+    icon.addEventListener("click", copy);
+    item.querySelector(".contact-label").addEventListener("click", copy);
   }
 })();
