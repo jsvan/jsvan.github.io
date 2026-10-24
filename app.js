@@ -138,11 +138,13 @@
     });
 
   function build() {
-    const homeLabel = document.createElement("h2");
-    homeLabel.className = "sidebar-folder-name sidebar-home";
-    homeLabel.textContent = HOME.title;
-    rows.set(HOME.id, homeLabel);
-    sidebar.append(homeLabel);
+    // Home is a row like any project, but with no folder, tagline or X.
+    const homeRow = document.createElement("button");
+    homeRow.className = "sidebar-row sidebar-home";
+    homeRow.innerHTML = `<h3 class="sidebar-row-title">${esc(HOME.title)}</h3>`;
+    homeRow.addEventListener("click", goHome);
+    rows.set(HOME.id, homeRow);
+    sidebar.append(homeRow);
 
     const all = [];
     for (const folder of window.FOLDERS) {

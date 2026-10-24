@@ -154,11 +154,6 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
 }
 .sidebar-folder-name:first-child { margin-top: 0; }
 
-/* Same width and inset as a project row; vertical padding offset so spacing is unchanged */
-.sidebar-home { cursor: pointer; padding: 8px; margin: -8px 0; }
-.sidebar-home:hover { color: #555; }
-.sidebar-home.active { background: rgba(0, 0, 0, 0.05); color: #1a1a1a; }
-
 .sidebar-row {
   position: relative;
   display: block;
@@ -167,6 +162,8 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
   cursor: pointer;
   transition: background 0.15s;
 }
+/* Home: no divider, but the transparent border keeps its spacing */
+.sidebar-home { border-bottom-color: transparent; }
 .sidebar-row:hover { background: rgba(0, 0, 0, 0.03); }
 .sidebar-row.active { background: rgba(0, 0, 0, 0.05); }
 .sidebar-row.active .sidebar-row-title { color: #1a1a1a; }
@@ -179,6 +176,7 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
   line-height: 1.3;
   margin-bottom: 3px;
 }
+.sidebar-row-title:last-child { margin-bottom: 0; } /* Home: title only */
 .sidebar-row-meta { font-size: 11px; font-weight: 500; color: #999; line-height: 1.4; }
 .sidebar-row.active { padding-right: 28px; }
 .sidebar-row-close {

@@ -4,8 +4,8 @@
 // Taglines come from essays/descriptions.txt ("Title: tagline" per line).
 // `url` makes the image and title clickable. Work diagrams are static SVGs
 // rendered from diagrams/*.mmd by tools/render-diagrams.mjs.
-// Landing panel, shown when no ?p= is given. "Home" heads the sidebar with
-// no rows under it; clicking it, a row's X, or anywhere off the panel returns here.
+// Landing panel, shown when no ?p= is given. "Home" is the first sidebar row,
+// outside any folder; clicking it, a row's X, or anywhere off the panel returns here.
 // Its tagline is the essay's first line, so it is dropped from the essay body.
 window.HOME = {
   id: "home",
