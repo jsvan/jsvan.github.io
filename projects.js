@@ -10,7 +10,7 @@ window.HOME = {
   id: "home",
   title: "Home",
   tagline: '"You hypocrites! You know how to interpret the appearance of the earth and the sky; why do you not know how to interpret the present time?"',
-  image: "images/me.jpg",
+  image: "images/julian-concert.jpg",
   alt: "Photo of Julian Vanecek",
   essay: "essays/personal_essay.txt",
   url: "https://github.com/jsvan",
@@ -18,7 +18,7 @@ window.HOME = {
 
 window.FOLDERS = [
   {
-    name: "Projects",
+    name: "Cultural Projects",
     items: [
       {
         id: "kreslit",
@@ -37,29 +37,6 @@ window.FOLDERS = [
         url: "https://jsvan.github.io/news_bias_analyzer_v2/",
       },
       {
-        id: "ulisu",
-        title: "U Lisu",
-        tagline: "Offline converter of photos of book pages to flashcards",
-        image: "images/ulisu.jpg",
-        essay: "essays/ulisu_essay.txt",
-        url: "https://www.ulisu.com",
-      },
-      {
-        id: "smart-apartment",
-        title: "Smart Apartment",
-        tagline: "Dystopian Voice Controlled Apartment Simulation",
-        image: "images/smart-apartment.jpg",
-        essay: "essays/smart_apartment_essay.txt",
-      },
-      {
-        id: "grimmsly",
-        title: "Grimmsly",
-        tagline: "Write Family Stories by Connecting to Local Writers",
-        image: "images/grimmsly.jpg",
-        essay: "essays/grimmsly_essay.txt",
-        url: "https://www.grimmsly.com",
-      },
-      {
         id: "tgm",
         title: "TGM Propaganda Unit",
         tagline: "Holistically Tune an LLM to Deeply Hold Values",
@@ -74,13 +51,18 @@ window.FOLDERS = [
         image: "images/word-assoc.jpg",
         essay: "essays/word_assoc_essay.txt",
       },
+    ],
+  },
+  {
+    name: "Language Projects",
+    items: [
       {
-        id: "internal-voice",
-        title: "Internal Voice",
-        tagline: "Hear yourself the way you do",
-        image: "images/internal-voice.jpg",
-        essay: "essays/internal_voice_essay.txt",
-        url: "https://jsvan.github.io/internal-voice/",
+        id: "ulisu",
+        title: "U Lisu",
+        tagline: "Offline converter of photos of book pages to flashcards",
+        image: "images/ulisu.jpg",
+        essay: "essays/ulisu_essay.txt",
+        url: "https://www.ulisu.com",
       },
       {
         id: "friend-swipe",
@@ -97,6 +79,34 @@ window.FOLDERS = [
         image: "images/glish.jpg",
         essay: "essays/glish_essay.txt",
         url: "https://github.com/jsvan/-glish",
+      },
+    ],
+  },
+  {
+    name: "Other",
+    items: [
+      {
+        id: "grimmsly",
+        title: "Grimmsly",
+        tagline: "Write Family Stories by Connecting to Local Writers",
+        image: "images/grimmsly.jpg",
+        essay: "essays/grimmsly_essay.txt",
+        url: "https://www.grimmsly.com",
+      },
+      {
+        id: "smart-apartment",
+        title: "Smart Apartment",
+        tagline: "Dystopian Voice Controlled Apartment Simulation",
+        image: "images/smart-apartment.jpg",
+        essay: "essays/smart_apartment_essay.txt",
+      },
+      {
+        id: "internal-voice",
+        title: "Internal Voice",
+        tagline: "Hear yourself the way you do",
+        image: "images/internal-voice.jpg",
+        essay: "essays/internal_voice_essay.txt",
+        url: "https://jsvan.github.io/internal-voice/",
       },
     ],
   },
