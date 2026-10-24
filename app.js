@@ -122,6 +122,7 @@
   const homeLabel = document.createElement("h2");
   homeLabel.className = "sidebar-folder-name sidebar-home";
   homeLabel.textContent = HOME.title;
+  rows.set(HOME.id, homeLabel);
   sidebar.append(homeLabel);
 
   const all = [];

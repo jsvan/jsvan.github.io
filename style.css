@@ -154,8 +154,10 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
 }
 .sidebar-folder-name:first-child { margin-top: 0; }
 
-.sidebar-home { cursor: pointer; }
+/* Same width and inset as a project row; vertical padding offset so spacing is unchanged */
+.sidebar-home { cursor: pointer; padding: 8px; margin: -8px 0; }
 .sidebar-home:hover { color: #555; }
+.sidebar-home.active { background: rgba(0, 0, 0, 0.05); color: #1a1a1a; }
 
 .sidebar-row {
   position: relative;
