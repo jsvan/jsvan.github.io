@@ -243,20 +243,59 @@ button { font: inherit; color: inherit; background: none; border: none; text-ali
 .sidebar-row.active .sidebar-row-close { display: block; }
 .sidebar-row-close:hover { color: #1a1a1a; background: rgba(0, 0, 0, 0.06); }
 
+/* Hamburger and backdrop exist only on phones */
+.menu-toggle { display: none; }
+.sidebar-backdrop { display: none; }
+
 /* ---- Mobile ---- */
 @media (max-width: 768px) {
   body { padding: 0; padding-top: env(safe-area-inset-top); }
+  body.menu-open { overflow: hidden; }
   .landing-container { height: auto; overflow: visible; }
-  .landing-topbar { padding: 16px; }
+  .landing-topbar { padding: 16px; align-items: center; gap: 12px; }
   .landing-brand { position: static; transform: none; font-size: 18px; }
-  .landing-body { flex-direction: column; padding: 20px 16px; gap: 24px; }
-  .landing-featured { overflow: visible; padding: 16px; }
-  /* List goes first on phones: the essays are long, so it would be lost below them. */
-  .landing-sidebar {
-    order: -1;
-    width: 100%;
-    padding: 16px;
-    overflow: visible;
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-left: -6px;
+    color: #555;
+    border-radius: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
   }
-  .landing-featured { scroll-margin-top: 12px; }
+  .menu-toggle:hover { background: rgba(0, 0, 0, 0.06); }
+  .topbar-links { align-items: center; }
+  .landing-body { padding: 20px 16px; }
+  .landing-featured { overflow: visible; padding: 16px; scroll-margin-top: 12px; }
+  /* List becomes a drawer that slides in from the left, over the page. */
+  .landing-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    width: min(320px, 85vw);
+    padding: calc(16px + env(safe-area-inset-top)) 16px 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0s 0.25s;
+  }
+  .menu-open .landing-sidebar {
+    transform: none;
+    visibility: visible;
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.15);
+    transition: transform 0.25s ease;
+  }
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.3);
+  }
+  .sidebar-backdrop[hidden] { display: none; }
 }

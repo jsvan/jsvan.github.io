@@ -111,7 +111,10 @@
     current = p;
     if (fromClick) {
       history.replaceState(null, "", p === HOME ? location.pathname : `?p=${p.id}`);
-      if (p !== HOME && window.matchMedia("(max-width: 768px)").matches) featured.scrollIntoView({ behavior: "smooth" });
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        setMenuOpen(false);
+        featured.scrollIntoView({ behavior: "smooth" });
+      }
     }
   }
 
@@ -174,12 +177,26 @@
     [HOME, ...all].forEach(loadEssay);
 
     // A click anywhere off the open project goes Home. Rows handle their own
-    // clicks (including the X), links open in a new tab, and Contact has its own menu.
+    // clicks (including the X), links open in a new tab, Contact has its own menu,
+    // and the phone drawer's toggle and backdrop only open and close it.
     document.addEventListener("click", (e) => {
-      if (featured.contains(e.target) || e.target.closest(".sidebar-row, a, .contact")) return;
+      if (featured.contains(e.target) || e.target.closest(".sidebar-row, a, .contact, .menu-toggle, .sidebar-backdrop, .menu-open .landing-sidebar")) return;
       goHome();
     });
   }
+
+  // Phone drawer: the hamburger opens the project list over the page; the
+  // backdrop, Escape or picking a row closes it.
+  const menuToggle = document.querySelector(".menu-toggle");
+  const backdrop = document.querySelector(".sidebar-backdrop");
+  function setMenuOpen(open) {
+    document.body.classList.toggle("menu-open", open);
+    backdrop.hidden = !open;
+    menuToggle.setAttribute("aria-expanded", open);
+  }
+  menuToggle.addEventListener("click", () => setMenuOpen(!document.body.classList.contains("menu-open")));
+  backdrop.addEventListener("click", () => setMenuOpen(false));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenuOpen(false); });
 
   // Contact dropdown: toggles on its button, closes on Escape or a click outside.
   const COPY_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';

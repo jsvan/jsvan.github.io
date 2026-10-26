@@ -16,6 +16,9 @@
 <body>
   <div class="landing-container">
     <header class="landing-topbar">
+      <button class="menu-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Projects menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
       <a class="landing-brand" href="./">Julian Vanecek</a>
       <span class="topbar-links">
         <a class="topbar-link" href="https://github.com/jsvan" target="_blank" rel="noopener">GitHub</a>
@@ -40,8 +43,11 @@
       <main class="landing-featured" id="featured" aria-live="polite"></main>
       <nav class="landing-sidebar" id="sidebar" aria-label="Projects"></nav>
     </div>
+    <div class="sidebar-backdrop" hidden></div>
   </div>
   <script src="projects.js"></script>
   <script src="app.js"></script>
+  <!-- TEMPORARY background tuner: delete this line and tune.js when done -->
+  <script src="tune.js"></script>
 </body>
 </html>
