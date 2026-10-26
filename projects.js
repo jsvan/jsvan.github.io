@@ -61,7 +61,7 @@ window.FOLDERS = [
       },
       {
         id: "friend-swipe",
-        title: "Friend Swipe",
+        title: "Narodni Trida",
         image: "images/friend-swipe.jpg",
         essay: "essays/friend_swipe_essay.txt",
         url: "https://narodnitrida.vercel.app",

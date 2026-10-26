@@ -7,7 +7,7 @@ Smart Apartment: Dystopian voice controlled apartment simulation
 Grimmsly: Write family stories by connecting to local writers
 TGM Propaganda Unit: Holistically tune an LLM to deeply hold values
 Word Associations: Compare implicit morality axis of words from different news outlets
-Friend Swipe: Language learning AI guided simulation, where you do real world based interaction quests with simulated citizens
+Narodni Trida: Language learning AI guided simulation, where you do real world based interaction quests with simulated citizens
 -Glish: Foreign vocab learner inside the webpages you already read
 Bus Stop Bloom Filter: How can bloom filters change public transportation signage?
 Internal Voice: Hear yourself the way others do, how you do
