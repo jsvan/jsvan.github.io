@@ -1,7 +1,25 @@
-Since January 2024 my phone has been quietly writing down where I am every couple of hours. A little Shortcuts automation adds the date, time and coordinates to a file, and skips it if I haven't moved. Almost three years later that's over eleven thousand points of where I've been.
+Life moves me around and sometimes I move myself too. When I sit in airplanes, I wonder about the time-dimensional "snake" that I would look like. I think about what my snake would look like since my birth. This information is lost, but that doesn't mean I couldn't start collecting my data a few decades too late. Every hour my phone saves a location to a growing csv (with some optimizations), but I need a way to visualize it. I had been using the website www.gpsvisualizer.com, but there are two problems: A) I am giving a 3rd party my life location data, and B) its features are a bit clunky for what I need. 
 
-For a while I was dropping the file into GPS Visualizer. It works fine, and I trust it, but not necessarily. Handing my whole location history to some website just to draw a picture felt off, so I made my own. The file never leaves the browser.
+The visualization can be static or animated. Points and connecting lines can be toggled independantly, colors changed, opacities, etc. 
 
-It draws the track as lines and points, which I can color, resize, fade or hide separately. But really I made it for the animation. Press play and a snake crawls through time across the map, circling around one city for months and then suddenly shooting across an ocean. It's strange to watch your own life wander around like that.
 
-This is a tool for me, nobody else. The trip in the picture is made up.
+This site lets you upload a similar CSV of form:
+
+-- one location per line, 
+-- csv
+-- ordered as date, time, latitude, longitude
+  
+  date, time, latitude, longitude
+  4/2/24, 08:00:03, 40.4167754, -3.7037902
+  15.06.2025, 18:00:01, -33.8688197, 151.2092955
+
+  - Latitude has to be between −90 and 90, longitude between −180 and 180 
+  - Dates can be any of the following (if any slash date has a first number above 12, all slash dates in the file are read day-first instead): 
+    - M/D/YY or M/D/YYYY
+    - D.M.YYYY
+    - YYYY-MM-DD
+    - Two-digit years become 20xx.
+  - Times can be H:MM or H:MM:SS, 24-hour or with AM/PM (with no time, the point is placed at midnight)
+  - A line whose date can't be read is dropped
+  - Order doesn't matter. Points are sorted by time before drawing, so the animation always runs in time order.
+
