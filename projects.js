@@ -107,6 +107,14 @@ window.FOLDERS = [
         url: "https://jsvan.github.io/internal-voice/",
       },
       {
+        id: "lifesnake",
+        title: "Life Snake",
+        image: "images/lifesnake.jpg",
+        alt: "A made-up demo trip drawn as a track across the world map",
+        essay: "essays/lifesnake_essay.txt",
+        url: "lifesnake/",
+      },
+      {
         id: "bus-stop-bloom",
         title: "Bus Stop Bloom Filter",
         image: "images/bus-stop-bloom.png",

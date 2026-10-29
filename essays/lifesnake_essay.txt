@@ -1,0 +1,7 @@
+Since January 2024 my phone has been quietly writing down where I am every couple of hours. A little Shortcuts automation adds the date, time and coordinates to a file, and skips it if I haven't moved. Almost three years later that's over eleven thousand points of where I've been.
+
+For a while I was dropping the file into GPS Visualizer. It works fine, and I trust it, but not necessarily. Handing my whole location history to some website just to draw a picture felt off, so I made my own. The file never leaves the browser.
+
+It draws the track as lines and points, which I can color, resize, fade or hide separately. But really I made it for the animation. Press play and a snake crawls through time across the map, circling around one city for months and then suddenly shooting across an ocean. It's strange to watch your own life wander around like that.
+
+This is a tool for me, nobody else. The trip in the picture is made up.

@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Life Snake</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f6f4; --panel: #ffffff; --text: #1d1d1f; --muted: #6e6e73;
+    --border: #e2e2e0; --accent: #2f6fde; --input: #f2f2f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111113; --panel: #1c1c1f; --text: #ececee; --muted: #9a9aa0;
+      --border: #2e2e33; --accent: #6b9cff; --input: #26262a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  body { display: flex; }
+  #panel { width: 290px; flex: none; height: 100%; overflow-y: auto; background: var(--panel);
+    border-right: 1px solid var(--border); padding: 14px 16px 24px; }
+  #map { flex: 1; height: 100%; position: relative; }
+  h1 { font-size: 17px; margin: 0 0 2px; }
+  .sub { color: var(--muted); margin: 0 0 12px; }
+  section { border-top: 1px solid var(--border); padding: 12px 0 4px; }
+  section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+    margin: 0 0 8px; display: flex; align-items: center; justify-content: space-between; }
+  .row { display: grid; grid-template-columns: 74px 1fr 44px; align-items: center; gap: 8px; margin: 6px 0; }
+  .row label { color: var(--muted); }
+  .row output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  input[type=color] { width: 100%; height: 24px; border: 1px solid var(--border); border-radius: 4px; padding: 0 2px; background: var(--input); }
+  select, button { font: inherit; color: var(--text); background: var(--input); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 8px; }
+  select { width: 100%; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: transparent; }
+  .switch { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);
+    text-transform: none; letter-spacing: 0; }
+  .check { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  #drop { border: 1.5px dashed var(--border); border-radius: 8px; padding: 14px; text-align: center;
+    color: var(--muted); cursor: pointer; }
+  #drop.over { border-color: var(--accent); color: var(--accent); }
+  #stats { color: var(--muted); margin-top: 8px; white-space: pre-line; }
+  #clock { font-size: 15px; font-variant-numeric: tabular-nums; margin: 4px 0 2px; }
+  #scrub { margin: 4px 0; }
+  #overlay { position: absolute; inset: 0; pointer-events: none; z-index: 450; }
+  #tip { position: absolute; z-index: 460; pointer-events: none; background: var(--panel); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; font-size: 12px;
+    white-space: nowrap; display: none; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  #toggle { display: none; }
+  @media (max-width: 700px) {
+    body { flex-direction: column; }
+    #panel { width: 100%; height: auto; max-height: 50%; border-right: 0; border-bottom: 1px solid var(--border); }
+    #panel.collapsed > :not(header) { display: none; }
+    #toggle { display: inline-block; float: right; }
+  }
+</style>
+</head>
+<body>
+<div id="panel">
+  <header>
+    <button id="toggle">Controls</button>
+    <h1>Life Snake</h1>
+    <p class="sub">Your data stays in this browser. Nothing is uploaded.</p>
+  </header>
+
+  <section>
+    <div id="drop">Drop <b>locations.csv</b> here<br>or click to choose<input id="file" type="file" accept=".csv,.txt,text/csv" hidden></div>
+    <div id="stats"></div>
+    <div class="row"><label>Map</label>
+      <select id="base" style="grid-column: span 2">
+        <option value="osm">OpenStreetMap</option>
+        <option value="streets">Streets (Esri)</option>
+        <option value="light">Light gray (Esri)</option>
+        <option value="dark">Dark gray (Esri)</option>
+        <option value="sat">Satellite (Esri)</option>
+      </select></div>
+    <div class="btns"><button id="fit">Fit to data</button></div>
+  </section>
+
+  <section>
+    <h2>Lines <span class="switch"><input type="checkbox" id="lineOn">show</span></h2>
+    <div class="row"><label>Color</label><input type="color" id="lineColor"><span></span></div>
+    <div class="row"><label>Width</label><input type="range" id="lineWidth" min="0.5" max="10" step="0.5"><output></output></div>
+    <div class="row"><label>Opacity</label><input type="range" id="lineOpacity" min="0.02" max="1" step="0.02"><output></output></div>
+    <label class="check"><input type="checkbox" id="lineStack">Overlaps darken (repeat routes stand out)</label>
+  </section>
+
+  <section>
+    <h2>Points <span class="switch"><input type="checkbox" id="pointOn">show</span></h2>
+    <div class="row"><label>Color</label><input type="color" id="pointColor"><span></span></div>
+    <div class="row"><label>Size</label><input type="range" id="pointSize" min="0.5" max="12" step="0.5"><output></output></div>
+    <div class="row"><label>Opacity</label><input type="range" id="pointOpacity" min="0.02" max="1" step="0.02"><output></output></div>
+  </section>
+
+  <section>
+    <h2>Age fade</h2>
+    <div class="row"><label>Fade old</label><input type="range" id="fade" min="0" max="1" step="0.05"><output></output></div>
+    <p class="sub" style="margin:0">Older lines and points get more transparent. During playback "old" is relative to the snake's head.</p>
+  </section>
+
+  <section>
+    <h2>Animation</h2>
+    <div id="clock">—</div>
+    <input type="range" id="scrub" min="0" max="1000" step="1" value="1000">
+    <div class="btns">
+      <button id="play" class="primary">▶ Play</button>
+      <button id="restart">⏮ Start</button>
+      <button id="end">⏭ End</button>
+    </div>
+    <div class="row"><label>Speed</label>
+      <select id="speed" style="grid-column: span 2">
+        <option value="1">1 hour / sec</option>
+        <option value="6">6 hours / sec</option>
+        <option value="24">1 day / sec</option>
+        <option value="168">1 week / sec</option>
+        <option value="720">1 month / sec</option>
+        <option value="8760">1 year / sec</option>
+      </select></div>
+    <div class="row"><label>Tail</label>
+      <select id="tail" style="grid-column: span 2">
+        <option value="0">Whole history</option>
+        <option value="24">Last day</option>
+        <option value="168">Last week</option>
+        <option value="720">Last month</option>
+        <option value="2160">Last 3 months</option>
+        <option value="8760">Last year</option>
+      </select></div>
+    <div class="row"><label>Head</label><input type="color" id="headColor"><span></span></div>
+    <label class="check"><input type="checkbox" id="follow">Follow the head</label>
+    <label class="check"><input type="checkbox" id="loop">Loop</label>
+  </section>
+</div>
+<div id="map"><canvas id="overlay"></canvas><div id="tip"></div></div>
+
+<script>
+const DEFAULTS = {
+  base: 'osm', lineOn: true, lineColor: '#e0352b', lineWidth: 2, lineOpacity: 0.5, lineStack: true,
+  pointOn: true, pointColor: '#1f5fd1', pointSize: 2.5, pointOpacity: 0.6, fade: 0,
+  speed: '24', tail: '0', headColor: '#ff9500', follow: false, loop: false,
+};
+const S = { ...DEFAULTS };
+try { Object.assign(S, JSON.parse(localStorage.getItem('lifesnake-settings') || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem('lifesnake-settings', JSON.stringify(S)); } catch (e) {} };
+
+// ---------- Map ----------
+const map = L.map('map', { zoomAnimation: false, worldCopyJump: false, minZoom: 1 }).setView([30, 0], 2);
+const BASES = {
+  light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri', 16],
+  dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri', 16],
+  streets: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', 'Tiles &copy; Esri'],
+  osm: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'],
+  sat: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'Imagery &copy; Esri'],
+};
+let baseLayer;
+function setBase(k) {
+  if (baseLayer) map.removeLayer(baseLayer);
+  baseLayer = L.tileLayer(BASES[k][0], { attribution: BASES[k][1], maxNativeZoom: BASES[k][2] || 19, maxZoom: 19, referrerPolicy: 'strict-origin-when-cross-origin' }).addTo(map);
+}
+
+// ---------- Parsing ----------
+// Rows look like "1/13/24, 10:00:02, lat, lon" (US) or "29.10.2026, 13:00:02, lat, lon" (EU);
+// the date style can change mid-file when the phone's region changes, so detect it per row.
+function parseCSV(text) {
+  const raw = [];
+  for (const line of text.split(/\r?\n/)) {
+    const f = line.split(',').map(x => x.trim().replace(/^"|"$/g, ''));
+    if (f.length < 3) continue;
+    const lat = Number(f[f.length - 2]), lon = Number(f[f.length - 1]);
+    if (f[f.length - 2] === '' || !isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+    raw.push({ dt: f.slice(0, -2).join(' ').replace(/[  ]/g, ' '), lat, lon });
+  }
+  // Slash dates are M/D/Y unless some row proves otherwise (first field > 12).
+  const slashDayFirst = raw.some(r => { const m = r.dt.match(/^(\d{1,2})\/(\d{1,2})\//); return m && +m[1] > 12; });
+  const pts = []; let skipped = 0;
+  for (const r of raw) {
+    const t = parseDate(r.dt, slashDayFirst);
+    if (isNaN(t)) { skipped++; continue; }
+    pts.push({ t, lat: r.lat, lon: r.lon });
+  }
+  pts.sort((a, b) => a.t - b.t);
+  return { pts, skipped };
+}
+function parseDate(s, slashDayFirst) {
+  let y, mo, d;
+  let m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+  else if ((m = s.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/))) { d = +m[1]; mo = +m[2]; y = +m[3]; }
+  else if ((m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/))) {
+    if (slashDayFirst) { d = +m[1]; mo = +m[2]; } else { mo = +m[1]; d = +m[2]; }
+    y = +m[3];
+  } else return Date.parse(s.replace(' at ', ' '));
+  if (y < 100) y += 2000;
+  let h = 0, mi = 0, se = 0;
+  const tm = s.slice(m.index + m[0].length).match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AaPp])?\.?[Mm]?/);
+  if (tm) {
+    h = +tm[1]; mi = +tm[2]; se = +(tm[3] || 0);
+    if (tm[4]) { const pm = /p/i.test(tm[4]); if (pm && h < 12) h += 12; if (!pm && h === 12) h = 0; }
+  }
+  return new Date(y, mo - 1, d, h, mi, se).getTime();
+}
+
+// ---------- Data ----------
+let P = [];            // sorted points; lonU = longitude unwrapped across the antimeridian
+let T0 = 0, T1 = 0, playT = 0;
+function setData(pts, skipped, name) {
+  let prev = null;
+  for (const p of pts) {
+    let lon = p.lon;
+    if (prev !== null) { while (lon - prev > 180) lon -= 360; while (lon - prev < -180) lon += 360; }
+    p.lonU = lon; prev = lon;
+  }
+  P = pts;
+  T0 = P.length ? P[0].t : 0; T1 = P.length ? P[P.length - 1].t : 0; playT = T1;
+  const fmt = t => new Date(t).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  $('stats').textContent = P.length
+    ? `${name}\n${P.length.toLocaleString()} points · ${fmt(T0)} → ${fmt(T1)}` + (skipped ? `\n${skipped} rows skipped (unreadable date)` : '')
+    : `${name}: no valid rows found`;
+  fit(); updateClock(); draw();
+}
+function fit() {
+  if (!P.length) return;
+  map.fitBounds(L.latLngBounds(P.map(p => [p.lat, p.lonU])), { padding: [30, 30] });
+}
+
+// ---------- Drawing ----------
+const canvas = $('overlay'), ctx = canvas.getContext('2d');
+let drawn = { from: 0, to: -1, xy: new Float64Array(0), W: 256 };
+const lowerBound = t => { let lo = 0, hi = P.length; while (lo < hi) { const m = (lo + hi) >> 1; if (P[m].t < t) lo = m + 1; else hi = m; } return lo; };
+
+function draw() {
+  const size = map.getSize(), dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== size.x * dpr || canvas.height !== size.y * dpr) {
+    canvas.width = size.x * dpr; canvas.height = size.y * dpr;
+    canvas.style.width = size.x + 'px'; canvas.style.height = size.y + 'px';
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, size.x, size.y);
+  if (!P.length) return;
+
+  const tail = +S.tail * 3600e3;
+  const end = lowerBound(playT + 1) - 1;               // last point with t <= playT
+  if (end < 0) return;
+  const from = tail ? Math.min(lowerBound(playT - tail), end) : 0;
+  const n = end - from + 1;
+
+  // Interpolated head between `end` and the next point, so the snake moves smoothly.
+  let head = null;
+  if (end < P.length - 1 && playT < T1) {
+    const a = P[end], b = P[end + 1], f = (playT - a.t) / (b.t - a.t);
+    head = [a.lat + (b.lat - a.lat) * f, a.lonU + (b.lonU - a.lonU) * f];
+  } else if (playT < T1 || playing) head = [P[end].lat, P[end].lonU];
+
+  const xy = new Float64Array((n + 1) * 2);
+  let minX = Infinity, maxX = -Infinity;
+  for (let i = 0; i < n; i++) {
+    const p = P[from + i], c = map.latLngToContainerPoint([p.lat, p.lonU]);
+    xy[2 * i] = c.x; xy[2 * i + 1] = c.y;
+    if (c.x < minX) minX = c.x; if (c.x > maxX) maxX = c.x;
+  }
+  if (head) { const c = map.latLngToContainerPoint(head); xy[2 * n] = c.x; xy[2 * n + 1] = c.y; }
+  const W = 256 * Math.pow(2, map.getZoom());          // pixel width of one world copy
+  drawn = { from, to: end, xy, W };
+
+  const span = tail || Math.max(playT - T0, 1);
+  const alphaAt = i => S.fade ? Math.max(0.02, 1 - S.fade * Math.min(1, (playT - P[from + i].t) / span)) : 1;
+
+  const k0 = Math.max(-3, Math.ceil(-maxX / W)), k1 = Math.min(3, Math.floor((size.x - minX) / W));
+  for (let k = k0; k <= k1; k++) {
+    ctx.save(); ctx.translate(k * W, 0);
+    if (S.lineOn) {
+      ctx.strokeStyle = S.lineColor; ctx.lineWidth = S.lineWidth; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      const last = head ? n : n - 1;
+      if (!S.lineStack && !S.fade) {
+        ctx.globalAlpha = S.lineOpacity; ctx.beginPath(); ctx.moveTo(xy[0], xy[1]);
+        for (let i = 1; i <= last; i++) ctx.lineTo(xy[2 * i], xy[2 * i + 1]);
+        ctx.stroke();
+      } else {
+        for (let i = 1; i <= last; i++) {
+          ctx.globalAlpha = S.lineOpacity * alphaAt(i - 1);
+          ctx.beginPath(); ctx.moveTo(xy[2 * i - 2], xy[2 * i - 1]); ctx.lineTo(xy[2 * i], xy[2 * i + 1]); ctx.stroke();
+        }
+      }
+    }
+    if (S.pointOn) {
+      ctx.fillStyle = S.pointColor;
+      for (let i = 0; i < n; i++) {
+        ctx.globalAlpha = S.pointOpacity * alphaAt(i);
+        ctx.beginPath(); ctx.arc(xy[2 * i], xy[2 * i + 1], S.pointSize, 0, 6.2832); ctx.fill();
+      }
+    }
+    if (head) {
+      const hx = xy[2 * n], hy = xy[2 * n + 1], r = Math.max(5, S.pointSize + 3);
+      ctx.globalAlpha = 1; ctx.fillStyle = S.headColor; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(hx, hy, r, 0, 6.2832); ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+map.on('move zoom resize viewreset', draw);
+
+// ---------- Hover tooltip ----------
+const tip = $('tip');
+map.on('mousemove', e => {
+  const { from, to, xy, W } = drawn, mx = e.containerPoint.x, my = e.containerPoint.y;
+  let best = -1, bestD = Math.max(8, S.pointSize + 4) ** 2;
+  for (let i = 0; i <= to - from; i++) {
+    let dx = ((mx - xy[2 * i]) % W + W) % W; dx = Math.min(dx, W - dx);
+    const dy = my - xy[2 * i + 1], d = dx * dx + dy * dy;
+    if (d < bestD) { bestD = d; best = from + i; }
+  }
+  if (best < 0 || (!S.pointOn && !S.lineOn)) { tip.style.display = 'none'; return; }
+  const p = P[best];
+  tip.textContent = `${new Date(p.t).toLocaleString()}  ·  ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`;
+  tip.style.display = 'block';
+  tip.style.left = Math.min(mx + 12, map.getSize().x - tip.offsetWidth - 4) + 'px';
+  tip.style.top = (my + 12) + 'px';
+});
+map.on('mouseout', () => tip.style.display = 'none');
+
+// ---------- Animation ----------
+let playing = false, lastFrame = 0;
+function updateClock() {
+  $('clock').textContent = P.length ? new Date(playT).toLocaleString(undefined,
+    { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+  $('scrub').value = T1 > T0 ? Math.round((playT - T0) / (T1 - T0) * 1000) : 1000;
+}
+function setPlaying(on) {
+  playing = on && P.length > 0;
+  $('play').textContent = playing ? '❚❚ Pause' : '▶ Play';
+  if (playing) {
+    if (playT >= T1) playT = T0;
+    lastFrame = performance.now(); requestAnimationFrame(tick);
+  }
+  draw();
+}
+function tick(now) {
+  if (!playing) return;
+  const dt = Math.min(now - lastFrame, 100) / 1000; lastFrame = now;
+  playT += dt * +S.speed * 3600e3;
+  if (playT >= T1) {
+    if (S.loop) playT = T0; else { playT = T1; updateClock(); setPlaying(false); return; }
+  }
+  if (S.follow) {
+    const i = Math.max(0, lowerBound(playT + 1) - 1), ll = L.latLng(P[i].lat, P[i].lonU);
+    if (!map.getBounds().pad(-0.2).contains(ll)) map.panTo(ll, { animate: false });
+  }
+  updateClock(); draw();
+  requestAnimationFrame(tick);
+}
+$('play').onclick = () => setPlaying(!playing);
+$('restart').onclick = () => { playT = T0; updateClock(); draw(); };
+$('end').onclick = () => { setPlaying(false); playT = T1; updateClock(); draw(); };
+$('scrub').oninput = e => { playT = T0 + (T1 - T0) * (+e.target.value / 1000); updateClock(); draw(); };
+
+// ---------- Controls ----------
+function $(id) { return document.getElementById(id); }
+for (const key of Object.keys(DEFAULTS)) {
+  const el = $(key); if (!el) continue;
+  const out = el.parentElement.querySelector('output');
+  const show = () => { if (out) out.textContent = el.step && +el.step < 0.1 ? Math.round(el.value * 100) + '%' : el.value; };
+  if (el.type === 'checkbox') el.checked = S[key]; else el.value = S[key];
+  show();
+  el.addEventListener('input', () => {
+    S[key] = el.type === 'checkbox' ? el.checked : el.type === 'range' ? +el.value : el.value;
+    show(); save();
+    if (key === 'base') setBase(S.base);
+    draw();
+  });
+}
+setBase(S.base);
+$('fit').onclick = fit;
+$('toggle').onclick = () => { $('panel').classList.toggle('collapsed'); setTimeout(() => map.invalidateSize(), 0); };
+
+// ---------- File loading ----------
+const drop = $('drop');
+function load(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => { setPlaying(false); const { pts, skipped } = parseCSV(r.result); setData(pts, skipped, file.name); };
+  r.readAsText(file);
+}
+drop.onclick = () => $('file').click();
+$('file').onchange = e => load(e.target.files[0]);
+window.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+window.addEventListener('dragleave', e => { if (!e.relatedTarget) drop.classList.remove('over'); });
+window.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); load(e.dataTransfer.files[0]); });
+</script>
+</body>
+</html>
