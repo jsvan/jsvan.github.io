@@ -1,5 +1,6 @@
 Home: "You hypocrites! You know how to interpret the appearance of the earth and the sky; why do you not know how to interpret the present time?"
 
+Philbert: Visual sandbox for the Hilbert metric, built while hunting for a max-margin SVM inside it
 Kreslit: Automated LLM pipeline to convert dense essays into voiced, point and click explorable scene plays.
 News bias analyzer: Compare and cluster news companies by their sentiment emissions
 U Lisu: Offline converter of photos of book pages to flashcards
