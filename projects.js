@@ -18,19 +18,6 @@ window.HOME = {
 
 window.FOLDERS = [
   {
-    name: "Research",
-    items: [
-      {
-        id: "philbert",
-        title: "Philbert",
-        image: "images/philbert.jpg",
-        alt: "Hilbert balls, a ball about a line, and the primal and dual views of an SVM separator",
-        essay: "essays/philbert_essay.txt",
-        url: "philbert/",
-      },
-    ],
-  },
-  {
     name: "Cultural Projects",
     items: [
       {
@@ -91,6 +78,14 @@ window.FOLDERS = [
   {
     name: "Other",
     items: [
+      {
+        id: "philbert",
+        title: "Philbert",
+        image: "images/philbert.jpg",
+        alt: "Hilbert balls, a ball about a line, and the primal and dual views of an SVM separator",
+        essay: "essays/philbert_essay.txt",
+        url: "philbert/",
+      },
       {
         id: "grimmsly",
         title: "Grimmsly",

@@ -1,3 +1,4 @@
+This project supported a research paper in computational geometry under Prof. David Mount of UMD to find an SVM algorithm to work in Hilbert's metric space: https://scholar.google.com/citations?view_op=view_citation&hl=en&user=ytb8SDMAAAAJ&sortby=pubdate&citation_for_view=ytb8SDMAAAAJ:roLk4NBRz8UC
 
 Why I built this
 Most geometry quietly assumes distance is measured with a ruler. The Hilbert metric throws that out. Pick any convex shape, and measure distance inside it by how your points sit relative to its walls. The walls end up infinitely far away, straight lines are still shortest paths, and circles turn into polygons that are fat in the middle and squashed flat near the edges. If the shape is a disk you get the Klein model of hyperbolic geometry, so this is a generalization of something people already find beautiful, with the corners left in.
