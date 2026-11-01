@@ -155,7 +155,8 @@
 // (start place, samples, end place) are certain: you were at each one, in that order.
 // 1. Trips between the same two places that could have been as quick as the quickest made no stop, so they
 //    rode one of a few routes. Each trip gets a probability of each route and of going its own way; two or
-//    more trips that go their own way found a new route. Repeat until no trip changes route.
+//    more trips that go their own way found a new route. Repeat until no trip changes route; a trip still
+//    going its own way then is a route of its own.
 // 2. Any trip whose consecutive dots fit a route better than its own way rode it there, and the route takes
 //    those samples as stepping stones. Repeat until no route gains a sample.
 // A dot x fits a route by its detour between the route's points u and v around it (the trip's own samples
@@ -325,6 +326,8 @@ function pairRoutes(P, places, trips) {
         for (const R of rs) { R.pts = new Map(E.flatMap(t => t.w.map(n => [n, t.prob.get(R) || 0]))); redraw(R); }
         if (O.length >= 2 && !tried.has(key)) { tried.add(key); const R = route(a, b, from(O)); rs.push(R); for (const t of O) t.best = R; }
       }
+      // A trip that goes its own way is still a certain path between the two places: a route of its own.
+      for (const t of E) if (!t.best) rs.push(route(a, b, from([t])));
       for (const R of rs) { R.members = new Set(E); R.core = new Set([...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n)); }
       routes.push(...rs);
     }
