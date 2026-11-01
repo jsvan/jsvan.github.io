@@ -100,6 +100,14 @@
   </section>
 
   <section>
+    <h2>Routes <span class="switch"><input type="checkbox" id="routeOn">show</span></h2>
+    <div class="row"><label>Color</label><input type="color" id="routeColor"><span></span></div>
+    <div class="row"><label>Width</label><input type="range" id="routeWidth" min="0.5" max="12" step="0.5"><output></output></div>
+    <div class="row"><label>Opacity</label><input type="range" id="routeOpacity" min="0.02" max="1" step="0.02"><output></output></div>
+    <div id="routeInfo" class="sub"></div>
+  </section>
+
+  <section>
     <h2>Age fade</h2>
     <div class="row"><label>Fade old</label><input type="range" id="fade" min="0" max="1" step="0.05"><output></output></div>
     <p class="sub" style="margin:0">Older lines and points get more transparent. During playback "old" is relative to the snake's head.</p>
@@ -139,10 +147,274 @@
 </div>
 <div id="map"><canvas id="overlay"></canvas><div id="tip"></div></div>
 
+<script id="routes-code" type="text/plain">
+// Routes: the ways you travel, inferred from the whole history with no map. Runs in a worker on upload.
+// self.computeRoutes(P) → { routes: [[[lat, lon], ...], ...], trips, ms }, P = [{ t, lat, lon, lonU }] in time order.
+//
+// Places are where you spent time. A trip is the samples between two consecutive place visits; its dots
+// (start place, samples, end place) are certain: you were at each one, in that order.
+// 1. Trips between the same two places that could have been as quick as the quickest made no stop, so they
+//    rode one of a few routes. Each trip gets a probability of each route and of going its own way; two or
+//    more trips that go their own way found a new route. Repeat until no trip changes route.
+// 2. Any trip whose consecutive dots fit a route better than its own way rode it there, and the route takes
+//    those samples as stepping stones. Repeat until no route gains a sample.
+// A dot x fits a route by its detour between the route's points u and v around it (the trip's own samples
+// left out): bend = (|ux| + |xv| − |uv|) / max(|uv|, 50 m). Nothing has a length scale but the phone's
+// accuracy, so walks and flights follow the same rules. As a density, bend ~ Exp(λ) spread over the
+// ellipse of equal bend: log p = −λ·bend − 2 log D − log z(λ), D = max(|uv|, 50 m); λ by maximum likelihood.
+(function () {
+const EARTH = 6371000, RAD = Math.PI / 180, FLOOR = 50, ALPHA = 1;
+const PLACE_M = 100, PLACE_HOURS = 10, COVER_CAP_H = 3;
+const toV = (lat, lon) => { const c = Math.cos(lat * RAD); return [EARTH * c * Math.cos(lon * RAD), EARTH * c * Math.sin(lon * RAD), EARTH * Math.sin(lat * RAD)]; };
+const toLL = ([x, y, z]) => [Math.asin(z / Math.hypot(x, y, z)) / RAD, Math.atan2(y, x) / RAD];
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+const d2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+
+// Places: grid cells of PLACE_M where you spent at least PLACE_HOURS, touching cells merged. Each sample
+// stands for half the gap to each neighbour (a gap counting at most COVER_CAP_H: longer, the phone was off),
+// so places count time, not samples, whatever the sampling rate.
+function findPlaces(P) {
+  const cap = COVER_CAP_H * 3600e3, gap = n => Math.min(cap, P[n].t - P[n - 1].t), cells = new Map();
+  for (let n = 0; n < P.length; n++) {
+    const p = P[n], i = Math.floor(p.lat * 111320 / PLACE_M), j = Math.floor(p.lonU * 111320 * Math.cos(p.lat * RAD) / PLACE_M), key = i + ',' + j;
+    let c = cells.get(key);
+    if (!c) cells.set(key, c = { i, j, members: [], ms: 0, place: null });
+    c.members.push(n); c.ms += ((n > 0 ? gap(n) : 0) + (n < P.length - 1 ? gap(n + 1) : 0)) / 2;
+  }
+  const dense = c => c && c.ms >= PLACE_HOURS * 3600e3, places = [];
+  for (const c of cells.values()) {
+    if (c.place || !dense(c)) continue;
+    const pl = { members: [] }, stack = [c];
+    c.place = pl;
+    while (stack.length) {
+      const d = stack.pop();
+      pl.members.push(...d.members);
+      for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+        const e = cells.get((d.i + di) + ',' + (d.j + dj));
+        if (dense(e) && !e.place) { e.place = pl; stack.push(e); }
+      }
+    }
+    pl.lat = pl.members.reduce((s, n) => s + P[n].lat, 0) / pl.members.length;
+    pl.lon = pl.members.reduce((s, n) => s + P[n].lonU, 0) / pl.members.length;
+    places.push(pl);
+  }
+  places.sort((a, b) => b.members.length - a.members.length);
+  const placeOf = new Int32Array(P.length).fill(-1);
+  places.forEach((pl, id) => { for (const n of pl.members) placeOf[n] = id; });
+  return { places, placeOf };
+}
+
+// Trips: the samples between two consecutive samples at places (the same place for a round trip).
+function findTrips(P, placeOf) {
+  const trips = [];
+  let last = -1;
+  for (let n = 0; n < P.length; n++) {
+    if (placeOf[n] < 0) continue;
+    if (last >= 0 && n - last > 1) {
+      const words = [];
+      for (let k = last + 1; k < n; k++) words.push(k);
+      trips.push({ a: placeOf[last], b: placeOf[n], span: P[n].t - P[last].t, words });
+    }
+    last = n;
+  }
+  return trips;
+}
+
+function pairRoutes(P, places, trips) {
+  const X = P.map(p => toV(p.lat, p.lonU)), PL = places.map(p => toV(p.lat, p.lon));
+  const dts = []; for (let n = 1; n < P.length; n++) dts.push(P[n].t - P[n - 1].t);
+  dts.sort((a, b) => a - b);
+  const step = dts[dts.length >> 1];   // the typical sampling interval
+  // A sample's weight: the time it stands for relative to the typical interval, at most 1, so a trip sampled
+  // every minute counts about as much as a sparse trip of the same duration, not sixty times as much.
+  const wt = new Float64Array(P.length);
+  for (let n = 0; n < P.length; n++) wt[n] = Math.min(1, ((n > 0 ? Math.min(step, P[n].t - P[n - 1].t) : step) + (n < P.length - 1 ? Math.min(step, P[n + 1].t - P[n].t) : step)) / 2 / step);
+
+  // Trips with samples: dots = start place, samples, end place; ids[k] = the sample of dot k (−1: a place).
+  const T = trips.filter(t => t.words.length).map((t, k) => ({ k, a: t.a, b: t.b, span: t.span, w: t.words,
+    dots: [PL[t.a], ...t.words.map(n => X[n]), PL[t.b]], ids: [-1, ...t.words, -1], prob: null, pOther: 1, best: null }));
+  const tripOf = new Map(); T.forEach(t => t.w.forEach(n => tripOf.set(n, t.k)));
+
+  // A detour of x between u and v: its bend, and log D, the scale it is spread over.
+  const detour = (u, x, v) => { const uv = dist(u, v), D = Math.max(uv, FLOOR); return { b: (dist(u, x) + dist(x, v) - uv) / D, lD: Math.log(D) }; };
+  const own = (t, k) => detour(t.dots[k - 1], t.dots[k], t.dots[k + 1]);
+  const onRoute = (R, x, tk) => {   // u, v: R's nearest points around x that are not trip tk's
+    let i = segmentOf(R.line, x) - 1, j = i + 1;
+    while (i > 0 && R.vt[i] === tk) i--;
+    while (j < R.line.length - 1 && R.vt[j] === tk) j++;
+    return detour(R.line[i], x, R.line[j]);
+  };
+  // log z(λ) = log ∫ e^(−λb) dA(b), A(b) = π/4 (1 + b) √(b (2 + b)): the area inside bend b for D = 1.
+  const area = b => Math.PI / 4 * (1 + b) * Math.sqrt(b * (2 + b));
+  const logz = l => { let s = 0; const n = 400, h = 8 / n; for (let k = 1; k <= n; k++) { const v = k * h; s += Math.exp(-v * v) * area(v * v / l) * 2 * v * (k === n ? 0.5 : 1); } return Math.log(s * h); };
+  let lambda = 5, lz = logz(lambda);
+  const logp = d => -lambda * d.b - 2 * d.lD - lz;
+
+  // A route: its samples with their probability (pts); stage-1 samples (core) fix its shape, later ones may
+  // only add stepping stones between two consecutive core points. Its line runs from place a to place b by
+  // the path whose hops cost length² (a Fermat path), so it steps through evidence rather than jumping.
+  function route(a, b, pts) { const R = { a, b, pts, core: null }; redraw(R); return R; }
+  function redraw(R) {
+    const keep = [...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n);
+    const core = R.core ? keep.filter(n => R.core.has(n)) : keep, rest = R.core ? keep.filter(n => !R.core.has(n)) : [];
+    let ids = [-1, ...fermat(core.map(n => X[n]), PL[R.a], PL[R.b]).map(k => core[k]), -1];
+    if (rest.length) {   // only points inside the ball on a hop as diameter can shorten it
+      const pos = (n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b], out = [-1];
+      for (let k = 1; k < ids.length; k++) {
+        const u = pos(ids[k - 1], k - 1), v = pos(ids[k], k), c = u.map((s, i) => (s + v[i]) / 2), r2 = d2(u, v) / 4;
+        const inside = rest.filter(n => d2(X[n], c) < r2);
+        out.push(...fermat(inside.map(n => X[n]), u, v).map(i => inside[i]), ids[k]);
+      }
+      ids = out;
+    }
+    R.vt = ids.map(n => n < 0 ? -1 : tripOf.get(n));
+    R.line = ids.map((n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b]);
+    R.c = [0, 1, 2].map(i => R.line.reduce((s, p) => s + p[i], 0) / R.line.length);
+    R.r = Math.max(...R.line.map(p => dist(p, R.c)));
+  }
+
+  // Equivalent trips per pair of places. A trip's true duration lies between the time from its first to its
+  // last sample (surely moving) and its span (last sample at A to first at B); it is equivalent when it could
+  // have been as quick as the pair's quickest span.
+  const byPair = new Map(), eqSets = [];
+  for (const t of T) if (t.a !== t.b) {
+    const key = t.a < t.b ? t.a + ',' + t.b : t.b + ',' + t.a;
+    (byPair.get(key) || byPair.set(key, []).get(key)).push(t);
+  }
+  for (const ts of byPair.values()) {
+    const quickest = Math.min(...ts.map(t => t.span)), E = ts.filter(t => P[t.w[t.w.length - 1]].t - P[t.w[0]].t <= quickest);
+    if (E.length) eqSets.push(E);
+  }
+
+  // 1. Routes from equivalent trips; λ is refitted until it settles.
+  let routes;
+  const sumRoute = (R, t) => t.w.reduce((s, n) => s + wt[n] * logp(onRoute(R, X[n], t.k)), 0);
+  const sumOwn = t => t.w.reduce((s, n, i) => s + wt[n] * logp(own(t, i + 1)), 0);
+  const from = ts => new Map(ts.flatMap(t => t.w.map(n => [n, 1])));
+  function stage1() {
+    routes = [];
+    for (const E of eqSets) {
+      const { a, b } = E[0];
+      if (E.length === 1) {   // one trip: its route is the trip
+        const t = E[0], R = route(a, b, from(E));
+        t.prob = new Map([[R, 1]]); t.pOther = 0; t.best = R;
+        R.members = new Set(E); R.core = new Set(t.w); routes.push(R);
+        continue;
+      }
+      let rs = [route(a, b, from(E))];
+      for (const t of E) t.best = rs[0];
+      const tried = new Set(), seen = new Set();
+      for (let it = 0; it < 30; it++) {
+        const count = new Map(rs.map(R => [R, 0]));
+        for (const t of E) if (t.best) count.set(t.best, count.get(t.best) + 1);
+        for (const t of E) {   // P(route) ∝ the pair's other trips on it · Π p; P(own way) ∝ α · Π p
+          const ll = rs.map(R => { const n = count.get(R) - (t.best === R ? 1 : 0); return n > 0 ? Math.log(n) + sumRoute(R, t) : -Infinity; });
+          const lo = Math.log(ALPHA) + sumOwn(t), m = Math.max(lo, ...ll);
+          const z = ll.reduce((s, l) => s + Math.exp(l - m), Math.exp(lo - m));
+          t.prob = new Map(rs.map((R, k) => [R, Math.exp(ll[k] - m) / z])); t.pOther = Math.exp(lo - m) / z;
+        }
+        for (const t of E) { t.best = null; let p = t.pOther; for (const [R, q] of t.prob) if (q > p) { t.best = R; p = q; } }
+        // A route most likely for fewer than two trips is dropped (unless it is the pair's only one).
+        const kept = rs.filter(R => rs.length === 1 || E.filter(t => t.best === R).length >= 2);
+        const O = E.filter(t => !t.best), key = O.map(t => t.k).join();
+        const state = E.map(t => rs.indexOf(t.best)).join() + '|' + kept.length;
+        if (kept.length === rs.length && seen.has(state) && (O.length < 2 || tried.has(key))) break;   // settled (or repeating)
+        seen.add(state);
+        for (const t of E) if (t.best && !kept.includes(t.best)) t.best = null;
+        rs = kept;
+        for (const R of rs) { R.pts = new Map(E.flatMap(t => t.w.map(n => [n, t.prob.get(R) || 0]))); redraw(R); }
+        if (O.length >= 2 && !tried.has(key)) { tried.add(key); const R = route(a, b, from(O)); rs.push(R); for (const t of O) t.best = R; }
+      }
+      for (const R of rs) { R.members = new Set(E); R.core = new Set([...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n)); }
+      routes.push(...rs);
+    }
+  }
+  for (let pass = 0; pass < 6; pass++) {
+    stage1();
+    let sb = 0, N = 0;   // maximum likelihood: maximize −λ Σ b − N log z(λ)
+    for (const E of eqSets) if (E.length > 1) for (const t of E)
+      t.w.forEach((n, i) => { sb += wt[n] * (t.best ? onRoute(t.best, X[n], t.k) : own(t, i + 1)).b; N += wt[n]; });
+    let lo = Math.log(0.01), hi = Math.log(1000); const g = (Math.sqrt(5) - 1) / 2, f = ll => -Math.exp(ll) * sb - N * logz(Math.exp(ll));
+    for (let k = 0; k < 60; k++) { const m1 = hi - g * (hi - lo), m2 = lo + g * (hi - lo); if (f(m1) < f(m2)) lo = m1; else hi = m2; }
+    const next = Math.exp((lo + hi) / 2);
+    if (Math.abs(next - lambda) < 0.05 * lambda) break;
+    lambda = next; lz = logz(lambda);
+  }
+
+  // 2. Grow: a trip's longest run of consecutive dots (two or more) that fit a route better than its own way;
+  // a place fits when it bends the route less than a typical sample does.
+  for (let round = 0; round < 30; round++) {
+    let added = 0; const dirty = new Set();
+    for (const t of T) for (const R of routes) {
+      if (R.members.has(t) || t.dots.every(x => dist(x, R.c) > 1.5 * R.r + FLOOR)) continue;
+      const last = t.dots.length - 1;
+      const lr = t.dots.map((x, k) => k === 0 || k === last ? 1 - lambda * onRoute(R, x, t.k).b : wt[t.ids[k]] * (logp(onRoute(R, x, t.k)) - logp(own(t, k))));
+      let run = null;
+      for (let i = 0; i < lr.length;) {
+        if (lr[i] <= 0) { i++; continue; }
+        let j = i, s = 0;
+        while (j < lr.length && lr[j] > 0) s += lr[j++];
+        if (!run || j - i > run.to - run.from + 1 || (j - i === run.to - run.from + 1 && s > run.sum)) run = { from: i, to: j - 1, sum: s };
+        i = j;
+      }
+      if (!run || run.to === run.from) continue;
+      const Prun = 1 / (1 + Math.exp(-run.sum));
+      for (let k = run.from; k <= run.to; k++) {
+        const n = t.ids[k];
+        if (n >= 0 && (R.pts.get(n) || 0) < Prun - 1e-9) { R.pts.set(n, Prun); added++; dirty.add(R); }
+      }
+    }
+    for (const R of dirty) redraw(R);
+    if (!added) break;
+  }
+  return { routes: routes.map(R => R.line.map(toLL)), trips: T.length };
+}
+
+// The segment (index of its end vertex) of `line` nearest to x.
+function segmentOf(line, x) {
+  let best = Infinity, seg = 1;
+  for (let k = 1; k < line.length; k++) {
+    const a = line[k - 1], b = line[k], ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], l2 = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2;
+    const f = l2 ? Math.max(0, Math.min(1, ((x[0] - a[0]) * ab[0] + (x[1] - a[1]) * ab[1] + (x[2] - a[2]) * ab[2]) / l2)) : 0;
+    const e = (x[0] - a[0] - f * ab[0]) ** 2 + (x[1] - a[1] - f * ab[1]) ** 2 + (x[2] - a[2] - f * ab[2]) ** 2;
+    if (e < best) { best = e; seg = k; }
+  }
+  return seg;
+}
+
+// Fermat path from p to q through pts (Dijkstra on the complete graph, hop cost length²): the indices of
+// the points it passes, in order.
+function fermat(pts, p, q) {
+  const V = pts.length + 2, Y = [...pts, p, q], s0 = V - 2, t = V - 1;
+  const best = new Float64Array(V).fill(Infinity), prev = new Int32Array(V).fill(-1), done = new Uint8Array(V);
+  best[s0] = 0;
+  for (;;) {
+    let u = -1;
+    for (let i = 0; i < V; i++) if (!done[i] && (u < 0 || best[i] < best[u])) u = i;
+    if (u < 0 || u === t || best[u] === Infinity) break;
+    done[u] = 1;
+    for (let i = 0; i < V; i++) if (!done[i]) {
+      const c = best[u] + d2(Y[i], Y[u]);
+      if (c < best[i]) { best[i] = c; prev[i] = u; }
+    }
+  }
+  const out = [];
+  for (let u = prev[t]; u >= 0 && u !== s0; u = prev[u]) out.push(u);
+  return out.reverse();
+}
+
+self.computeRoutes = P => {
+  const t0 = Date.now(), { places, placeOf } = findPlaces(P), r = pairRoutes(P, places, findTrips(P, placeOf));
+  return { ...r, ms: Date.now() - t0 };
+};
+})();
+</script>
+
 <script>
 const DEFAULTS = {
   base: 'osm', lineOn: true, lineColor: '#e0352b', lineWidth: 2, lineOpacity: 0.5, lineStack: true,
   pointOn: true, pointColor: '#1f5fd1', pointSize: 2.5, pointOpacity: 0.6, fade: 0,
+  routeOn: true, routeColor: '#7b2cbf', routeWidth: 3, routeOpacity: 0.45,
   speed: '24', tail: '0', headColor: '#ff9500', follow: false, loop: false,
 };
 const S = { ...DEFAULTS };
@@ -223,6 +495,38 @@ function setData(pts, skipped, name) {
     ? `${name}\n${P.length.toLocaleString()} points · ${fmt(T0)} → ${fmt(T1)}` + (skipped ? `\n${skipped} rows skipped (unreadable date)` : '')
     : `${name}: no valid rows found`;
   fit(); updateClock(); draw();
+  computeRoutesFor(P);
+}
+// ---------- Routes ----------
+// Routes are inferred from the whole history when a file is loaded (the code in #routes-code), in a worker
+// so the page stays responsive. They are a static layer: the animation does not affect them.
+let routes = [], routeJob = 0;
+function computeRoutesFor(pts) {
+  const job = ++routeJob, info = $('routeInfo');
+  routes = []; info.textContent = pts.length ? 'Finding routes…' : '';
+  if (!pts.length) return;
+  const data = pts.map(p => ({ t: p.t, lat: p.lat, lon: p.lon, lonU: p.lonU }));
+  const done = r => {
+    if (job !== routeJob) return;
+    // Unwrap each route's longitudes so it never jumps across the antimeridian.
+    routes = r.routes.map(l => { let prev = null; return l.map(([la, lo]) => { if (prev !== null) { while (lo - prev > 180) lo -= 360; while (lo - prev < -180) lo += 360; } prev = lo; return [la, lo]; }); });
+    info.textContent = `${routes.length} routes from ${r.trips.toLocaleString()} trips · ${(r.ms / 1000).toFixed(1)} s`;
+    draw();
+  };
+  const fail = e => { if (job === routeJob) info.textContent = 'Routes failed: ' + (e.message || e); };
+  const code = $('routes-code').textContent;
+  try {
+    const w = new Worker(URL.createObjectURL(new Blob([code + '\nself.onmessage = e => postMessage(computeRoutes(e.data));'], { type: 'text/javascript' })));
+    w.onmessage = e => { done(e.data); w.terminate(); };
+    w.onerror = e => { e.preventDefault(); w.terminate(); runHere(); };
+    w.postMessage(data);
+  } catch (e) { runHere(); }
+  // Without workers (some browsers refuse them for pages opened from a file), compute on this thread.
+  function runHere() {
+    setTimeout(() => {
+      try { if (!self.computeRoutes) (0, eval)(code); done(self.computeRoutes(data)); } catch (e) { fail(e); }
+    }, 30);
+  }
 }
 function fit() {
   if (!P.length) return;
@@ -243,6 +547,16 @@ function draw() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size.x, size.y);
   if (!P.length) return;
+
+  if (S.routeOn && routes.length) {   // one path per route; where routes overlap they darken
+    const W = 256 * Math.pow(2, map.getZoom()), lines = routes.map(l => l.map(ll => map.latLngToContainerPoint(ll)));
+    let minX = Infinity, maxX = -Infinity;
+    for (const l of lines) for (const c of l) { if (c.x < minX) minX = c.x; if (c.x > maxX) maxX = c.x; }
+    ctx.strokeStyle = S.routeColor; ctx.lineWidth = S.routeWidth; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = S.routeOpacity;
+    for (let k = Math.max(-3, Math.ceil(-maxX / W)); k <= Math.min(3, Math.floor((size.x - minX) / W)); k++)
+      for (const l of lines) { ctx.beginPath(); l.forEach((c, i) => i ? ctx.lineTo(c.x + k * W, c.y) : ctx.moveTo(c.x + k * W, c.y)); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  }
 
   const tail = +S.tail * 3600e3;
   const end = lowerBound(playT + 1) - 1;               // last point with t <= playT
