@@ -271,6 +271,7 @@ function pairRoutes(P, places, trips) {
     }
     R.vt = ids.map(n => n < 0 ? -1 : tripOf.get(n));
     R.line = ids.map((n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b]);
+    R.cum = [0]; for (let k = 1; k < R.line.length; k++) R.cum.push(R.cum[k - 1] + dist(R.line[k - 1], R.line[k]));
     R.c = [0, 1, 2].map(i => R.line.reduce((s, p) => s + p[i], 0) / R.line.length);
     R.r = Math.max(...R.line.map(p => dist(p, R.c)));
   }
@@ -362,6 +363,16 @@ function pairRoutes(P, places, trips) {
         i = j;
       }
       if (!run || run.to === run.from) continue;
+      // Riding a route means travelling along it past one of its own points, or over at least half of the hop it
+      // is on: two dots that only touch
+      // it between two of its points (a sample near a city, on a flight route whose next point is an ocean
+      // away) do not ride it.
+      const along = x => { const k = segmentOf(R.line, x), a = R.line[k - 1], b = R.line[k], l2 = d2(a, b);
+        const f = l2 ? Math.max(0, Math.min(1, ((x[0] - a[0]) * (b[0] - a[0]) + (x[1] - a[1]) * (b[1] - a[1]) + (x[2] - a[2]) * (b[2] - a[2])) / l2)) : 0;
+        return R.cum[k - 1] + f * Math.sqrt(l2); };
+      const ss = t.dots.slice(run.from, run.to + 1).map(along), lo = Math.min(...ss), hi = Math.max(...ss);
+      const k = R.cum.findIndex(c => c >= lo), hop = k > 0 ? R.cum[k] - R.cum[k - 1] : 0;   // the hop the run starts in
+      if (!R.cum.some((c, k) => k > 0 && k < R.cum.length - 1 && c > lo && c < hi) && hi - lo < hop / 2) continue;
       const Prun = 1 / (1 + Math.exp(-run.sum));
       for (let k = run.from; k <= run.to; k++) {
         const n = t.ids[k];
