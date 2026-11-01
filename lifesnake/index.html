@@ -30,8 +30,6 @@
   section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
     margin: 0 0 8px; display: flex; align-items: center; justify-content: space-between; }
   .row { display: grid; grid-template-columns: 74px 1fr 44px; align-items: center; gap: 8px; margin: 6px 0; }
-  .swatches { display: flex; margin: -2px 0 8px 82px; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
-  .swatches button { flex: 1 1 0; height: 12px; padding: 0; border: 0; border-radius: 0; cursor: pointer; }
   .row label { color: var(--muted); }
   .row output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
   input[type=range] { width: 100%; accent-color: var(--accent); }
@@ -771,19 +769,14 @@ for (const el of document.querySelectorAll('input[name=lineMode]')) {
   el.checked = el.value === S.lineMode;
   el.addEventListener('change', () => { if (el.checked) { S.lineMode = el.value; save(); draw(); } });
 }
-// A row of common colors under every color picker: the brightest hues, then white, gray and black.
+// Common colors offered inside every color picker's popup (the brightest hues, then white, gray and black): a
+// datalist the browser shows as suggestions (Chrome, Edge, Safari; Firefox shows only the picker).
 const SWATCHES = ['#ff0000', '#ff8000', '#ffff00', '#00ff00', '#00ffff', '#0080ff', '#0000ff', '#8000ff', '#ff00ff', '#ffffff', '#808080', '#000000'];
-for (const input of document.querySelectorAll('input[type=color]')) {
-  const row = document.createElement('div');
-  row.className = 'swatches';
-  for (const c of SWATCHES) {
-    const b = document.createElement('button');
-    b.style.background = c; b.title = c; b.setAttribute('aria-label', c);
-    b.onclick = () => { input.value = c; input.dispatchEvent(new Event('input')); };
-    row.append(b);
-  }
-  input.closest('.row').after(row);
-}
+const swatchList = document.createElement('datalist');
+swatchList.id = 'swatches';
+for (const c of SWATCHES) { const o = document.createElement('option'); o.value = c; swatchList.append(o); }
+document.body.append(swatchList);
+for (const input of document.querySelectorAll('input[type=color]')) input.setAttribute('list', 'swatches');
 // The Shortcut box stays closed once closed (in this browser).
 try { if (localStorage.getItem('lifesnake-promo-closed')) $('promo').remove(); } catch (e) {}
 if ($('promo')) $('promoClose').onclick = () => { $('promo').remove(); try { localStorage.setItem('lifesnake-promo-closed', '1'); } catch (e) {} };
