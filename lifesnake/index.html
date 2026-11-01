@@ -151,8 +151,8 @@
 // Routes: the ways you travel, inferred from the whole history with no map. Runs in a worker on upload.
 // self.computeRoutes(P) → { routes: [[[lat, lon], ...], ...], trips, ms }, P = [{ t, lat, lon, lonU }] in time order.
 //
-// Places are where you spent time. A trip is the samples between two consecutive place visits; its dots
-// (start place, samples, end place) are certain: you were at each one, in that order.
+// Places are where you stayed. A trip is the samples between two consecutive stays; its dots (start place,
+// samples, end place) are certain: you were at each one, in that order.
 // 1. Trips between the same two places that could have been as quick as the quickest made no stop, so they
 //    rode one of a few routes. Each trip gets a probability of each route and of going its own way; two or
 //    more trips that go their own way found a new route. Repeat until no trip changes route; a trip still
@@ -165,47 +165,48 @@
 // ellipse of equal bend: log p = −λ·bend − 2 log D − log z(λ), D = max(|uv|, 50 m); λ by maximum likelihood.
 (function () {
 const EARTH = 6371000, RAD = Math.PI / 180, FLOOR = 50, ALPHA = 1;
-const PLACE_M = 100, PLACE_HOURS = 10, COVER_CAP_H = 3;
+const STAY_M = 100;
 const toV = (lat, lon) => { const c = Math.cos(lat * RAD); return [EARTH * c * Math.cos(lon * RAD), EARTH * c * Math.sin(lon * RAD), EARTH * Math.sin(lat * RAD)]; };
 const toLL = ([x, y, z]) => [Math.asin(z / Math.hypot(x, y, z)) / RAD, Math.atan2(y, x) / RAD];
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const d2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
 
-// Places: grid cells of PLACE_M where you spent at least PLACE_HOURS, touching cells merged. Each sample
-// stands for half the gap to each neighbour (a gap counting at most COVER_CAP_H: longer, the phone was off),
-// so places count time, not samples, whatever the sampling rate.
+// Locations: where you stayed. A stay is a run of consecutive samples within STAY_M of its first, lasting at
+// least half the typical sampling interval (read from the data; half, because samples land a little early or
+// late): two samples at the same spot an interval apart, or the two ends of a long gap when the phone lay
+// still and recorded nothing. Stays within STAY_M of each other, on any outing, are one location.
 function findPlaces(P) {
-  const cap = COVER_CAP_H * 3600e3, gap = n => Math.min(cap, P[n].t - P[n - 1].t), cells = new Map();
-  for (let n = 0; n < P.length; n++) {
-    const p = P[n], i = Math.floor(p.lat * 111320 / PLACE_M), j = Math.floor(p.lonU * 111320 * Math.cos(p.lat * RAD) / PLACE_M), key = i + ',' + j;
-    let c = cells.get(key);
-    if (!c) cells.set(key, c = { i, j, members: [], ms: 0, place: null });
-    c.members.push(n); c.ms += ((n > 0 ? gap(n) : 0) + (n < P.length - 1 ? gap(n + 1) : 0)) / 2;
-  }
-  const dense = c => c && c.ms >= PLACE_HOURS * 3600e3, places = [];
-  for (const c of cells.values()) {
-    if (c.place || !dense(c)) continue;
-    const pl = { members: [] }, stack = [c];
-    c.place = pl;
-    while (stack.length) {
-      const d = stack.pop();
-      pl.members.push(...d.members);
-      for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
-        const e = cells.get((d.i + di) + ',' + (d.j + dj));
-        if (dense(e) && !e.place) { e.place = pl; stack.push(e); }
-      }
+  const meters = (a, b) => Math.hypot((b.lonU - a.lonU) * 111320 * Math.cos(a.lat * RAD), (b.lat - a.lat) * 111320);
+  const dts = []; for (let n = 1; n < P.length; n++) dts.push(P[n].t - P[n - 1].t);
+  dts.sort((a, b) => a - b);
+  const step = dts[dts.length >> 1], stays = [];
+  for (let i = 0; i < P.length;) {
+    let j = i;
+    while (j + 1 < P.length && meters(P[i], P[j + 1]) <= STAY_M) j++;
+    if (j > i && P[j].t - P[i].t >= step / 2) {
+      const s = { from: i, to: j, lat: 0, lonU: 0 };
+      for (let k = i; k <= j; k++) { s.lat += P[k].lat / (j - i + 1); s.lonU += P[k].lonU / (j - i + 1); }
+      stays.push(s);
     }
-    pl.lat = pl.members.reduce((s, n) => s + P[n].lat, 0) / pl.members.length;
-    pl.lon = pl.members.reduce((s, n) => s + P[n].lonU, 0) / pl.members.length;
-    places.push(pl);
+    i = j + 1;
   }
+  const parent = stays.map((_, i) => i), find = i => parent[i] === i ? i : (parent[i] = find(parent[i])), grid = new Map();
+  const cell = s => [Math.floor(s.lat * 111320 / STAY_M), Math.floor(s.lonU * 111320 * Math.cos(s.lat * RAD) / STAY_M)];
+  stays.forEach((s, i) => { const [a, b] = cell(s); (grid.get(a + ',' + b) || grid.set(a + ',' + b, []).get(a + ',' + b)).push(i); });
+  stays.forEach((s, i) => { const [a, b] = cell(s); for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) for (const k of grid.get((a + di) + ',' + (b + dj)) || []) if (k > i && meters(s, stays[k]) <= STAY_M) parent[find(k)] = find(i); });
+  const byRoot = new Map();
+  stays.forEach((s, i) => { const r = find(i); (byRoot.get(r) || byRoot.set(r, []).get(r)).push(s); });
+  const places = [...byRoot.values()].map(ss => {
+    const members = ss.flatMap(s => Array.from({ length: s.to - s.from + 1 }, (_, k) => s.from + k));
+    return { members, lat: members.reduce((a, n) => a + P[n].lat, 0) / members.length, lon: members.reduce((a, n) => a + P[n].lonU, 0) / members.length };
+  });
   places.sort((a, b) => b.members.length - a.members.length);
   const placeOf = new Int32Array(P.length).fill(-1);
   places.forEach((pl, id) => { for (const n of pl.members) placeOf[n] = id; });
   return { places, placeOf };
 }
 
-// Trips: the samples between two consecutive samples at places (the same place for a round trip).
+// Trips: the samples between two consecutive stays (the same place for a round trip).
 function findTrips(P, placeOf) {
   const trips = [];
   let last = -1;
