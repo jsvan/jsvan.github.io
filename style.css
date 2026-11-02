@@ -9,7 +9,7 @@ body {
   /* Tiled wallpaper around the panels; the panels keep the plain --bg. */
   /* A 70%-strength --bg layer on top makes the wallpaper 70% transparent. */
   --wash: color-mix(in srgb, var(--bg) 70%, transparent);
-  background: linear-gradient(var(--wash), var(--wash)), var(--bg) url("images/flower-wallpaper.jpg") repeat;
+  background: linear-gradient(var(--wash), var(--wash)), var(--bg) url("images/flower-wallpaper.webp") repeat;
   background-size: auto, 836px;
   color: #1a1a1a;
   display: flex;

@@ -5,4 +5,6 @@ I generated a variety of personas of people who populate a city and I created qu
 LLMs handle the conversations and use tools to dictate quest objectives or changes of states. Parallel LLM calls do a language critique/usage analysis that recommends improvements to how you speak (write), words you should use, words and structures you shouldn't use, etc. I use Claude Haiku for all -- cheap, fast, high quality, and good at tool use. 
 Each request returns with what they say, what they now remember about you, and which way the relationship moved. I made achievements and power-up drops from completing quests. I wanted ones like peeking at someone's secret description; the ones that shipped let you take back a swipe or stamp a quest closed. 
 
-Later I added Bogotá as a second city to allow Spanish, with its own 70 characters and 100 quests. The swipe app is stale now, and the walking one is where I keep working. 
+Later I added Bogotá as a second city to allow Spanish, with its own 70 characters and 100 quests. The swipe app is stale now, and the walking one is where I keep working.
+
+I put in day/night cycles. At night there is an overlaid gray noise layer, with noise sized at 3x3 pixels. Every frame, we sample 1/16th of the noise pixels and alter them. This makes the computation cheap enough to run without dropping frame rate. When we move, the layer moves opposite the player's movements, and the noise overlay on the edges of the screen that we've left (no longer visible) are moved onto the uncovered edges which we've moved towards.  

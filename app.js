@@ -82,7 +82,12 @@
     const seq = ++renderSeq;
     const isDiagram = p.image.endsWith(".svg");
     const alt = p.alt || `${isDiagram ? "Diagram" : "Screenshot"} of ${p.title}`;
-    const visual = `<img class="featured-image${isDiagram ? " featured-diagram" : ""}" src="${esc(p.image)}" alt="${esc(alt)}">`;
+    // Photos ship as x.webp plus a phone-sized x-960.webp (tools/make-images.sh).
+    // sizes: the panel tops out at 880px; on phones it is the screen less 64px of padding.
+    const srcset = p.image.endsWith(".webp")
+      ? ` srcset="${esc(p.image.replace(/\.webp$/, "-960.webp"))} 960w, ${esc(p.image)} 1600w" sizes="(max-width: 768px) calc(100vw - 64px), 880px"`
+      : "";
+    const visual = `<img class="featured-image${isDiagram ? " featured-diagram" : ""}" src="${esc(p.image)}"${srcset} alt="${esc(alt)}">`;
     featured.innerHTML = `
       ${link(p, visual, "featured-image-link")}
       <div class="featured-body">
