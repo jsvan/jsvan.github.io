@@ -79,3 +79,7 @@ philbert
 docstring
 sektoren
 pq
+narodni
+trida
+csv
+www.gpsvisualizer.com
