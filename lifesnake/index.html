@@ -403,9 +403,6 @@ function pairRoutes(P, places, trips) {
       const Prun = 1 / (1 + Math.exp(-run.sum));
       for (let k = run.from; k <= run.to; k++) {
         const n = t.ids[k];
-        // Only a sample its trip passed through (inside the ball on its neighbours as diameter, the Fermat path's
-        // own test) shapes another trip's route; a turnaround is a destination and says nothing of a way past it.
-        if (n >= 0 && d2(t.dots[k - 1], t.dots[k + 1]) <= d2(t.dots[k - 1], t.dots[k]) + d2(t.dots[k], t.dots[k + 1])) continue;
         if (n >= 0 && (R.pts.get(n) || 0) < Prun - 1e-9) { R.pts.set(n, Prun); added++; dirty.add(R); }
       }
     }
@@ -451,16 +448,7 @@ function pairRoutes(P, places, trips) {
     for (const R of cand) { const q = nearestOn(R, X[x]), d = dist(X[x], q); if (d < bd) { bd = d; best = q; } }
     if (best) stubs.push([n, ...toLL(X[x]), ...toLL(best)]);
   }
-  // Steps a route draws: one route passes through both samples (or through one and starts or ends at the other's
-  // location). A step whose samples lie on two different routes is drawn by neither, so it stays raw.
-  const routesAt = n => new Set([...(byVertex.get(n) || []), ...(placeOf[n] >= 0 ? byEnd.get(placeOf[n]) || [] : [])]);
-  const covered = [];
-  for (let n = 1; n < P.length; n++) {
-    if (!routed.has(n - 1) || !routed.has(n)) continue;
-    const a = routesAt(n - 1);
-    for (const R of routesAt(n)) if (a.has(R)) { covered.push(n); break; }
-  }
-  return { routes: routes.map(R => R.line.map(toLL)), routed: [...routed], covered, stubs, trips: T.length };
+  return { routes: routes.map(R => R.line.map(toLL)), routed: [...routed], stubs, trips: T.length };
 }
 
 // The segment (index of its end vertex) of `line` nearest to x.
@@ -592,17 +580,16 @@ function setData(pts, skipped, name) {
 // ---------- Routes ----------
 // Routes are inferred from the whole history when a file is loaded (the code in #routes-code), in a worker
 // so the page stays responsive. They are a static layer: the animation does not affect them.
-let routes = [], routed = null, covered = null, stubs = null, routeJob = 0;   // routed[n] = 1: sample n is on a route (or at a route's end); covered[n] = 1: a route draws step n − 1 → n
+let routes = [], routed = null, stubs = null, routeJob = 0;   // routed[n] = 1: sample n is on a route (or at a route's end)
 function computeRoutesFor(pts) {
   const job = ++routeJob;
-  routes = []; routed = null; covered = null; stubs = null;
+  routes = []; routed = null; stubs = null;
   if (!pts.length) return;
   const data = pts.map(p => ({ t: p.t, lat: p.lat, lon: p.lon, lonU: p.lonU }));
   const done = r => {
     if (job !== routeJob) return;
     // Unwrap each route's longitudes so it never jumps across the antimeridian.
     routed = new Uint8Array(P.length); for (const n of r.routed) routed[n] = 1;
-    covered = new Uint8Array(P.length); for (const n of r.covered) covered[n] = 1;
     // Stubs keyed by step; longitudes moved next to the sample's own (unwrapped) longitude.
     const near = (lo, ref) => { while (lo - ref > 180) lo -= 360; while (lo - ref < -180) lo += 360; return lo; };
     stubs = new Map(r.stubs.map(([n, la1, lo1, la2, lo2]) => { const ref = P[routed[n] ? n - 1 : n].lonU; return [n, [[la1, near(lo1, ref)], [la2, near(lo2, ref)]]]; }));
@@ -688,10 +675,9 @@ function draw() {
     if (S.lineOn) {
       ctx.strokeStyle = S.lineColor; ctx.lineWidth = S.lineWidth; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       const last = head ? n : n - 1;
-      // Simplified Lines: the routes alone (raw lines until they are computed). Simplified Lines++: the routes, plus
-      // every step no route draws.
-      const ready = routed && covered && stubs;
-      const skip = !ready ? null : S.lineMode === 'simplified' ? () => true : S.lineMode === 'simplified++' ? i => i < n && covered[from + i] : null;
+      // Simplified Lines++: a segment between two samples that routes account for is left to the routes; only the
+      // trip's own path from and to the points routes don't reach is drawn.
+      const skip = S.lineMode === 'simplified++' && routed && stubs ? i => i < n && routed[from + i - 1] && routed[from + i] : null;
       if (skip) {
         for (let i = 1; i <= last; i++) {
           if (skip(i)) continue;
