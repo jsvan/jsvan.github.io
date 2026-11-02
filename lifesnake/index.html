@@ -174,10 +174,11 @@
 //
 // Places are where you stayed. A trip is the samples between two consecutive stays; its dots (start place,
 // samples, end place) are certain: you were at each one, in that order.
-// 1. Trips between the same two places that could have been as quick as the quickest made no stop, so they
-//    rode one of a few routes. Each trip gets a probability of each route and of going its own way; two or
-//    more trips that go their own way found a new route. Repeat until no trip changes route; a trip still
-//    going its own way then is a route of its own.
+// 1. Trips between the same two places rode one of a few routes. Each trip gets a probability of each
+//    route and of going its own way; two or more trips that go their own way found a new route. Repeat
+//    until no trip changes route; a trip still going its own way then is a route of its own. A route's line
+//    passes through every sample that rides it; a trip's samples that fit its own way better than the route
+//    are a detour, drawn by the trip.
 // 2. Any trip whose consecutive dots fit a route better than its own way rode it there, and the route takes
 //    those samples as stepping stones. Repeat until no route gains a sample.
 // A dot x fits a route by its detour between the route's points u and v around it (the trip's own samples
@@ -236,7 +237,7 @@ function findTrips(P, placeOf) {
     if (last >= 0 && n - last > 1) {
       const words = [];
       for (let k = last + 1; k < n; k++) words.push(k);
-      trips.push({ a: placeOf[last], b: placeOf[n], span: P[n].t - P[last].t, words });
+      trips.push({ a: placeOf[last], b: placeOf[n], words });
     }
     last = n;
   }
@@ -254,7 +255,7 @@ function pairRoutes(P, places, trips) {
   for (let n = 0; n < P.length; n++) wt[n] = Math.min(1, ((n > 0 ? Math.min(step, P[n].t - P[n - 1].t) : step) + (n < P.length - 1 ? Math.min(step, P[n + 1].t - P[n].t) : step)) / 2 / step);
 
   // Trips with samples: dots = start place, samples, end place; ids[k] = the sample of dot k (−1: a place).
-  const T = trips.filter(t => t.words.length).map((t, k) => ({ k, a: t.a, b: t.b, span: t.span, w: t.words,
+  const T = trips.filter(t => t.words.length).map((t, k) => ({ k, a: t.a, b: t.b, w: t.words,
     dots: [PL[t.a], ...t.words.map(n => X[n]), PL[t.b]], ids: [-1, ...t.words, -1], prob: null, pOther: 1, best: null }));
   const tripOf = new Map(); T.forEach(t => t.w.forEach(n => tripOf.set(n, t.k)));
 
@@ -276,13 +277,24 @@ function pairRoutes(P, places, trips) {
   // A route: its samples with their probability (pts); stage-1 samples (core) fix its shape, later ones may
   // only add stepping stones between two consecutive core points. Its line runs from place a to place b by
   // the path whose hops cost length² (a Fermat path), so it steps through evidence rather than jumping.
-  function route(a, b, pts) { const R = { a, b, pts, core: null }; redraw(R); return R; }
+  // A route's line never drops a sample that rides it: one the Fermat path skips is inserted where it
+  // lengthens the line least. A route from one trip follows that trip's samples in order.
+  function route(a, b, pts, order) { const R = { a, b, pts, core: null, order }; redraw(R); return R; }
   function redraw(R) {
     const keep = [...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n);
     const core = R.core ? keep.filter(n => R.core.has(n)) : keep, rest = R.core ? keep.filter(n => !R.core.has(n)) : [];
-    let ids = [-1, ...fermat(core.map(n => X[n]), PL[R.a], PL[R.b]).map(k => core[k]), -1];
+    const inCore = new Set(core), pos = (n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b];
+    let ids = [-1, ...(R.order ? R.order.filter(n => inCore.has(n)) : fermat(core.map(n => X[n]), PL[R.a], PL[R.b]).map(k => core[k])), -1];
+    if (!R.order) {
+      const on = new Set(ids);
+      for (const n of core) if (!on.has(n)) {
+        let bk = 1, bc = Infinity;
+        for (let k = 1; k < ids.length; k++) { const u = pos(ids[k - 1], k - 1), v = pos(ids[k], k), c = dist(u, X[n]) + dist(X[n], v) - dist(u, v); if (c < bc) { bc = c; bk = k; } }
+        ids.splice(bk, 0, n);
+      }
+    }
     if (rest.length) {   // only points inside the ball on a hop as diameter can shorten it
-      const pos = (n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b], out = [-1];
+      const out = [-1];
       for (let k = 1; k < ids.length; k++) {
         const u = pos(ids[k - 1], k - 1), v = pos(ids[k], k), c = u.map((s, i) => (s + v[i]) / 2), r2 = d2(u, v) / 4;
         const inside = rest.filter(n => d2(X[n], c) < r2);
@@ -297,30 +309,25 @@ function pairRoutes(P, places, trips) {
     R.r = Math.max(...R.line.map(p => dist(p, R.c)));
   }
 
-  // Equivalent trips per pair of places. A trip's true duration lies between the time from its first to its
-  // last sample (surely moving) and its span (last sample at A to first at B); it is equivalent when it could
-  // have been as quick as the pair's quickest span.
-  const byPair = new Map(), eqSets = [];
+  // Trips per pair of places; every trip between two places helps find their routes.
+  const byPair = new Map();
   for (const t of T) if (t.a !== t.b) {
     const key = t.a < t.b ? t.a + ',' + t.b : t.b + ',' + t.a;
     (byPair.get(key) || byPair.set(key, []).get(key)).push(t);
   }
-  for (const ts of byPair.values()) {
-    const quickest = Math.min(...ts.map(t => t.span)), E = ts.filter(t => P[t.w[t.w.length - 1]].t - P[t.w[0]].t <= quickest);
-    if (E.length) eqSets.push(E);
-  }
+  const pairs = [...byPair.values()];
 
-  // 1. Routes from equivalent trips; λ is refitted until it settles.
+  // 1. Routes from each pair's trips; λ is refitted until it settles.
   let routes;
   const sumRoute = (R, t) => t.w.reduce((s, n) => s + wt[n] * logp(onRoute(R, X[n], t.k)), 0);
   const sumOwn = t => t.w.reduce((s, n, i) => s + wt[n] * logp(own(t, i + 1)), 0);
   const from = ts => new Map(ts.flatMap(t => t.w.map(n => [n, 1])));
   function stage1() {
     routes = [];
-    for (const E of eqSets) {
+    for (const E of pairs) {
       const { a, b } = E[0];
       if (E.length === 1) {   // one trip: its route is the trip
-        const t = E[0], R = route(a, b, from(E));
+        const t = E[0], R = route(a, b, from(E), t.w);
         t.prob = new Map([[R, 1]]); t.pOther = 0; t.best = R;
         R.members = new Set(E); R.core = new Set(t.w); routes.push(R);
         continue;
@@ -346,11 +353,13 @@ function pairRoutes(P, places, trips) {
         seen.add(state);
         for (const t of E) if (t.best && !kept.includes(t.best)) t.best = null;
         rs = kept;
-        for (const R of rs) { R.pts = new Map(E.flatMap(t => t.w.map(n => [n, t.prob.get(R) || 0]))); redraw(R); }
+        // A sample of a trip on R shapes R only where it fits R better than the trip's own way; the rest are detours.
+        const rides = (R, t, n, i) => logp(onRoute(R, X[n], t.k)) > logp(own(t, i + 1));
+        for (const R of rs) { R.pts = new Map(E.flatMap(t => t.w.map((n, i) => [n, rides(R, t, n, i) ? t.prob.get(R) || 0 : 0]))); redraw(R); }
         if (O.length >= 2 && !tried.has(key)) { tried.add(key); const R = route(a, b, from(O)); rs.push(R); for (const t of O) t.best = R; }
       }
       // A trip that goes its own way is still a certain path between the two places: a route of its own.
-      for (const t of E) if (!t.best) rs.push(route(a, b, from([t])));
+      for (const t of E) if (!t.best) rs.push(route(a, b, from([t]), t.w));
       for (const R of rs) { R.members = new Set(E); R.core = new Set([...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n)); }
       routes.push(...rs);
     }
@@ -358,7 +367,7 @@ function pairRoutes(P, places, trips) {
   for (let pass = 0; pass < 6; pass++) {
     stage1();
     let sb = 0, N = 0;   // maximum likelihood: maximize −λ Σ b − N log z(λ)
-    for (const E of eqSets) if (E.length > 1) for (const t of E)
+    for (const E of pairs) if (E.length > 1) for (const t of E)
       t.w.forEach((n, i) => { sb += wt[n] * (t.best ? onRoute(t.best, X[n], t.k) : own(t, i + 1)).b; N += wt[n]; });
     let lo = Math.log(0.01), hi = Math.log(1000); const g = (Math.sqrt(5) - 1) / 2, f = ll => -Math.exp(ll) * sb - N * logz(Math.exp(ll));
     for (let k = 0; k < 60; k++) { const m1 = hi - g * (hi - lo), m2 = lo + g * (hi - lo); if (f(m1) < f(m2)) lo = m1; else hi = m2; }
@@ -384,10 +393,9 @@ function pairRoutes(P, places, trips) {
         i = j;
       }
       if (!run || run.to === run.from) continue;
-      // Riding a route means travelling along it past one of its own points, or over at least half of the hop it
-      // is on: two dots that only touch
-      // it between two of its points (a sample near a city, on a flight route whose next point is an ocean
-      // away) do not ride it.
+      // Riding a route means travelling along it past one of its own points, or over at least half of the hop
+      // it is on: two dots that only touch it between two of its points (a sample near a city, on a flight
+      // route whose next point is an ocean away) do not ride it.
       const along = x => { const k = segmentOf(R.line, x), a = R.line[k - 1], b = R.line[k], l2 = d2(a, b);
         const f = l2 ? Math.max(0, Math.min(1, ((x[0] - a[0]) * (b[0] - a[0]) + (x[1] - a[1]) * (b[1] - a[1]) + (x[2] - a[2]) * (b[2] - a[2])) / l2)) : 0;
         return R.cum[k - 1] + f * Math.sqrt(l2); };
@@ -421,7 +429,7 @@ function pairRoutes(P, places, trips) {
   const routed = new Set(), ends = new Set();
   for (const R of routes) { for (const n of R.ids) if (n >= 0) routed.add(n); ends.add(R.a); ends.add(R.b); }
   P.forEach((_, n) => { if (ends.has(placeOf[n])) routed.add(n); });
-  // Lines light, the step between a sample routes don't reach (x) and its neighbour they do (y): the trip
+  // Simplified Lines++: the step between a sample routes don't reach (x) and its neighbour they do (y): the trip
   // most likely joined the route through y near x, so the step is drawn as a stub from x to the nearest point
   // of such a route, and the route carries the rest. No stub when it would be at least half as long as the step
   // (then no such route is a way to get there, and the step stays straight).
