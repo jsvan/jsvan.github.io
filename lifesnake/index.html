@@ -278,20 +278,18 @@ function pairRoutes(P, places, trips) {
   // only add stepping stones between two consecutive core points. Its line runs from place a to place b by
   // the path whose hops cost length² (a Fermat path), so it steps through evidence rather than jumping.
   // A route's line never drops a sample that rides it: one the Fermat path skips is inserted where it
-  // lengthens the line least. A route from one trip follows that trip's samples in order.
-  function route(a, b, pts, order) { const R = { a, b, pts, core: null, order }; redraw(R); return R; }
+  // lengthens the line least. Not time order: the phone's clock jumps when a flight crosses time zones.
+  function route(a, b, pts) { const R = { a, b, pts, core: null }; redraw(R); return R; }
   function redraw(R) {
     const keep = [...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n);
     const core = R.core ? keep.filter(n => R.core.has(n)) : keep, rest = R.core ? keep.filter(n => !R.core.has(n)) : [];
-    const inCore = new Set(core), pos = (n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b];
-    let ids = [-1, ...(R.order ? R.order.filter(n => inCore.has(n)) : fermat(core.map(n => X[n]), PL[R.a], PL[R.b]).map(k => core[k])), -1];
-    if (!R.order) {
-      const on = new Set(ids);
-      for (const n of core) if (!on.has(n)) {
-        let bk = 1, bc = Infinity;
-        for (let k = 1; k < ids.length; k++) { const u = pos(ids[k - 1], k - 1), v = pos(ids[k], k), c = dist(u, X[n]) + dist(X[n], v) - dist(u, v); if (c < bc) { bc = c; bk = k; } }
-        ids.splice(bk, 0, n);
-      }
+    const pos = (n, k) => n >= 0 ? X[n] : k === 0 ? PL[R.a] : PL[R.b];
+    let ids = [-1, ...fermat(core.map(n => X[n]), PL[R.a], PL[R.b]).map(k => core[k]), -1];
+    const on = new Set(ids);
+    for (const n of core) if (!on.has(n)) {
+      let bk = 1, bc = Infinity;
+      for (let k = 1; k < ids.length; k++) { const u = pos(ids[k - 1], k - 1), v = pos(ids[k], k), c = dist(u, X[n]) + dist(X[n], v) - dist(u, v); if (c < bc) { bc = c; bk = k; } }
+      ids.splice(bk, 0, n);
     }
     if (rest.length) {   // only points inside the ball on a hop as diameter can shorten it
       const out = [-1];
@@ -327,7 +325,7 @@ function pairRoutes(P, places, trips) {
     for (const E of pairs) {
       const { a, b } = E[0];
       if (E.length === 1) {   // one trip: its route is the trip
-        const t = E[0], R = route(a, b, from(E), t.w);
+        const t = E[0], R = route(a, b, from(E));
         t.prob = new Map([[R, 1]]); t.pOther = 0; t.best = R;
         R.members = new Set(E); R.core = new Set(t.w); routes.push(R);
         continue;
@@ -359,7 +357,7 @@ function pairRoutes(P, places, trips) {
         if (O.length >= 2 && !tried.has(key)) { tried.add(key); const R = route(a, b, from(O)); rs.push(R); for (const t of O) t.best = R; }
       }
       // A trip that goes its own way is still a certain path between the two places: a route of its own.
-      for (const t of E) if (!t.best) rs.push(route(a, b, from([t]), t.w));
+      for (const t of E) if (!t.best) rs.push(route(a, b, from([t])));
       for (const R of rs) { R.members = new Set(E); R.core = new Set([...R.pts].filter(([, p]) => p > 0.5).map(([n]) => n)); }
       routes.push(...rs);
     }
